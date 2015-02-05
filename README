@@ -1,0 +1,15 @@
+This is the code portion of a undergraduate thesis investigating the combination of two topics in Game Theory: ESS and Signalling. 
+
+
+To Run:
+Install FLAME and pre-reqs (limboard and xparser)
+
+if you wish, you can (re)generate 0.xml with generate_0th_iteration.rb
+
+(from xparser install location)
+run xparser on agent_model.xml
+
+(from basic-model)
+make [limboard path]
+
+main [num of iterations] 0.xml

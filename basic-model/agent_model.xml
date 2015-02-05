@@ -1,0 +1,210 @@
+<xmodel version="2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation='http://flame.ac.uk/schema/xmml_v2.xsd'>
+
+<!-- Model descriptions  -->    
+<name>model 01</name>
+<version>1</version>
+<description>An example model of sending and receiving a message between two agents</description>
+
+<environment>
+    <functionFiles> <!-- List of C files that hold agent functions -->
+        <file>buyer_functions.c</file>
+        <file>firm_functions.c</file>
+    </functionFiles>
+</environment>
+
+<!-- List of agents -->
+<agents>
+    <xagent>
+        <name>buyer</name>
+        <description>Agent buying good</description>
+        <!-- Agent memory holding a list of variables -->
+        <memory>
+            <variable>
+                <type>int</type>
+                <name>my_id</name>
+                <description>An integer variable representing buyer id</description>
+            </variable>
+            <variable>
+                <type>int</type>
+                <name>firm_id</name>
+                <description>An integer variable representing current firm purchasing from</description>
+            </variable>
+            <variable>
+                <type>int</type>
+                <name>my_qual</name>
+                <description>An integer variable representing quality last purchased</description>
+            </variable>
+        </memory>
+        <!-- List of agent functions -->
+        <functions>          				
+             <function>
+                <name>b_receive_messages</name>
+                <description>Receive messages</description>
+                <currentState>01</currentState>
+                <nextState>end</nextState>
+                <inputs> <!-- List of possible inputs -->
+                    <input>
+                        <messageName>PurchaseQuality</messageName>
+                        <filter>
+                          <lhs><value>a.my_id</value></lhs>
+                          <op>EQ</op>
+                          <rhs><value>m.id</value></rhs>
+                        </filter>
+                    </input>
+                </inputs>              
+            </function>
+            <function>
+                <name>b_send_message</name>
+                <description>Sending a message</description>
+                <currentState>start</currentState>
+                <nextState>01</nextState>
+                <outputs> <!-- List of possible outputs -->
+                     <output>
+                        <messageName>Purchase</messageName>
+                    </output>
+                </outputs>          
+            </function> 
+        </functions>
+    </xagent>
+
+    <xagent>
+        <name>firm</name>
+        <description>Agent selling good</description>
+        <!-- Agent memory holding a list of variables -->
+        <memory>
+            <variable>
+                <type>int</type>
+                <name>buyer_ids[100]</name>
+                <description>List of buyer purchases</description>
+            </variable>
+            <variable>
+                <type>int</type>
+                <name>my_id</name>
+                <description>An integer variable representing firm id</description>
+            </variable>
+            <variable>
+                <type>float</type>
+                <name>quality</name>
+                <description>Product Quality</description>
+            </variable>
+            <variable>
+                <type>int</type>
+                <name>stored_id</name>
+                <description>temporarily store id</description>
+            </variable>
+        </memory>
+        <!-- List of agent functions -->
+        <functions>
+             <function>
+                <name>f_send_message</name>
+                <description>Sending a message</description>
+                <currentState>02</currentState>
+                <nextState>end</nextState>
+                <outputs> <!-- List of possible outputs -->
+                    <output>
+                        <messageName>PurchaseQuality</messageName>
+                    </output>
+                </outputs>          
+            </function>
+            <function>
+                <name>f_idle</name>
+                <description>idle</description>
+                <currentState>start</currentState>
+                <nextState>01</nextState>          
+            </function>     
+            <function>
+                <name>f_receive_messages</name>
+                <description>Receive messages</description>
+                <currentState>01</currentState>
+                <nextState>02</nextState>
+                <inputs> <!-- List of possible inputs -->
+                    <input>
+                        <messageName>Purchase</messageName>
+                        <filter>
+                          <lhs><value>a.my_id</value></lhs>
+                          <op>EQ</op>
+                          <rhs><value>m.firm_id</value></rhs>
+                        </filter>
+                    </input>
+                </inputs>           
+            </function>          				
+        </functions>
+    </xagent>
+
+    <xagent>
+        <name>overseer</name>
+        <description>incarnation of genetic algorithm selection</description>
+        <memory>
+        </memory>
+        <functions>
+            <function>
+                <name>o_recieve_messages</name>
+                <description>recieve_messages</description>
+                <currentState>start</currentState>
+                <nextState>01</nextState>
+                <inputs> <!-- List of possible inputs -->
+                    <input>
+                        <messageName>PurchaseInfo</messageName>
+                    </input>
+                </inputs>              
+            </function>
+            <function>
+                <name>o_send_message</name>
+                <description>Sending a message</description>
+                <currentState>01</currentState>
+                <nextState>end</nextState>
+                <outputs> <!-- List of possible outputs -->
+                     <output>
+                        <messageName>StrategyAdjustment</messageName>
+                    </output>
+                </outputs>          
+            </function> 
+        </functions>
+    </xagent>
+</agents>
+
+<!-- List of messages -->
+<messages>
+
+     <message>
+        <name>PurchaseQuality</name>
+        <description>Contains quality of purchase</description>
+        <variables> <!-- List of message variables -->
+           <variable>
+            	<type>int</type>
+            	<name>qual</name>
+            	<description>Purchase Quality, 1 is good, 0 is mediocre</description>
+            </variable>
+            <variable>
+                <type>int</type>
+                <name>id</name>
+                <description>buyers id</description>
+            </variable>
+            <variable>
+                <type>int</type>
+                <name>seller</name>
+                <description>sellers id</description>
+            </variable>
+        </variables>
+    </message>
+    
+    <message>
+        <name>Purchase</name>
+        <description>A message holding an id signifying purchase</description>
+        <variables> <!-- List of message variables -->
+            <variable>
+                <type>int</type>
+                <name>an_id</name>
+                <description>Buyer id</description>
+            </variable>
+            <variable>
+                <type>int</type>
+                <name>firm_id</name>
+                <description>to what firm id</description>
+            </variable>
+        </variables>
+    </message>
+</messages>
+
+</xmodel>
