@@ -10,7 +10,15 @@
     <functionFiles> <!-- List of C files that hold agent functions -->
         <file>buyer_functions.c</file>
         <file>firm_functions.c</file>
+        <file>overseer_functions.c</file>
     </functionFiles>
+    <timeUnits>
+        <timeUnit>
+            <name>round</name>
+            <unit>iteration</unit>
+            <period>10</period>
+        </timeUnit>
+    </timeUnits>
 </environment>
 
 <!-- List of agents -->
@@ -100,7 +108,7 @@
                 <name>f_send_message</name>
                 <description>Sending a message</description>
                 <currentState>02</currentState>
-                <nextState>end</nextState>
+                <nextState>03</nextState>
                 <outputs> <!-- List of possible outputs -->
                     <output>
                         <messageName>PurchaseQuality</messageName>
@@ -128,7 +136,23 @@
                         </filter>
                     </input>
                 </inputs>           
-            </function>          				
+            </function>    
+            <function>
+                <name>f_receive_strategy</name>
+                <description>Receive new strategy</description>
+                <currentState>03</currentState>
+                <nextState>end</nextState>
+                <inputs>
+                    <input>
+                        <messageName>StrategyAdjustment</messageName>
+                        <filter>
+                          <lhs><value>a.my_id</value></lhs>
+                          <op>EQ</op>
+                          <rhs><value>m.firm_id</value></rhs>
+                        </filter>
+                    </input>
+                </inputs>
+            </function>      				
         </functions>
     </xagent>
 
@@ -136,10 +160,20 @@
         <name>overseer</name>
         <description>incarnation of genetic algorithm selection</description>
         <memory>
+            <variable>
+                <type>int</type>
+                <name>firm_revenues[10]</name>
+                <description>List of firm revenues</description>
+            </variable>
+            <variable>
+                <type>float</type>
+                <name>firm_strategies[10]</name>
+                <description>List of firm strategies</description>
+            </variable>
         </memory>
         <functions>
             <function>
-                <name>o_recieve_messages</name>
+                <name>o_receive_messages</name>
                 <description>recieve_messages</description>
                 <currentState>start</currentState>
                 <nextState>01</nextState>
@@ -154,6 +188,12 @@
                 <description>Sending a message</description>
                 <currentState>01</currentState>
                 <nextState>end</nextState>
+                <condition>
+                    <time>
+                        <period>round</period>
+                        <phase>0</phase>
+                    </time>
+                </condition>
                 <outputs> <!-- List of possible outputs -->
                      <output>
                         <messageName>StrategyAdjustment</messageName>
@@ -185,6 +225,11 @@
                 <type>int</type>
                 <name>seller</name>
                 <description>sellers id</description>
+            </variable>
+                <variable>
+                <type>float</type>
+                <name>strategy</name>
+                <description>strategy</description>
             </variable>
         </variables>
     </message>

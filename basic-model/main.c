@@ -28,11 +28,14 @@ int main(int argc, char * argv[])
 	int * p_iteration_number = &iteration_number;
 	//xmachine_memory_buyer * temp_xmachine_buyer;
 	//xmachine_memory_firm * temp_xmachine_firm;
+	//xmachine_memory_overseer * temp_xmachine_overseer;
 
 	int FLAME_PurchaseQuality_message_board_write;
 	int FLAME_PurchaseQuality_message_board_read;
 	int FLAME_Purchase_message_board_write;
 	int FLAME_Purchase_message_board_read;
+	int FLAME_StrategyAdjustment_message_board_write;
+	int FLAME_StrategyAdjustment_message_board_read;
 
 	/* Particle cloud data */
 	double cloud_data[6] = {0.0,0.0,0.0,0.0,0.0,0.0};
@@ -270,6 +273,7 @@ printf("Iterations: %i\n", iteration_total);
 	
 	/* Reading agents */
 	if(buyer_start_state->agents != NULL) FLAME_PurchaseQuality_message_board_read = 1;
+	if(overseer_start_state->agents != NULL) FLAME_PurchaseQuality_message_board_read = 1;
 	
 	/* Call message board library with details */
 	if(FLAME_PurchaseQuality_message_board_write == 0 &&
@@ -340,6 +344,52 @@ printf("Iterations: %i\n", iteration_total);
 			   break;
 		   case MB_ERR_LOCKED:
 			   fprintf(stderr, "\t reason: 'Purchase' board is locked\n");
+			   break;
+		   case MB_ERR_MEMALLOC:
+			   fprintf(stderr, "\t reason: out of memory\n");
+			   break;
+		   case MB_ERR_INTERNAL:
+			   fprintf(stderr, "\t reason: internal error. Recompile libmoard in debug mode for more info \n");
+			   break;
+		   default:
+			   fprintf(stderr, "\t MB_SyncStart returned error code: %d (see libmboard docs for details)\n", rc);
+			   break;
+	   }
+		   
+		   exit(rc);
+	}
+	#endif
+	FLAME_StrategyAdjustment_message_board_write = 0;
+	FLAME_StrategyAdjustment_message_board_read = 0;
+	/* Sending agents */
+	if(overseer_start_state->agents != NULL) FLAME_StrategyAdjustment_message_board_write = 1;
+	
+	/* Reading agents */
+	if(firm_start_state->agents != NULL) FLAME_StrategyAdjustment_message_board_read = 1;
+	
+	/* Call message board library with details */
+	if(FLAME_StrategyAdjustment_message_board_write == 0 &&
+		FLAME_StrategyAdjustment_message_board_read == 0)
+			rc = MB_SetAccessMode(b_StrategyAdjustment, MB_MODE_IDLE);
+	if(FLAME_StrategyAdjustment_message_board_write == 1 &&
+		FLAME_StrategyAdjustment_message_board_read == 0)
+			rc = MB_SetAccessMode(b_StrategyAdjustment, MB_MODE_WRITEONLY);
+	if(FLAME_StrategyAdjustment_message_board_write == 0 &&
+		FLAME_StrategyAdjustment_message_board_read == 1)
+			rc = MB_SetAccessMode(b_StrategyAdjustment, MB_MODE_READONLY);
+	if(FLAME_StrategyAdjustment_message_board_write == 1 &&
+		FLAME_StrategyAdjustment_message_board_read == 1)
+			rc = MB_SetAccessMode(b_StrategyAdjustment, MB_MODE_READWRITE);
+	#ifdef ERRCHECK
+	if (rc != MB_SUCCESS)
+	{
+	   fprintf(stderr, "ERROR: Could not set access mode of 'StrategyAdjustment' board\n");
+	   switch(rc) {
+		   case MB_ERR_INVALID:
+			   fprintf(stderr, "\t reason: 'StrategyAdjustment' board is invalid\n");
+			   break;
+		   case MB_ERR_LOCKED:
+			   fprintf(stderr, "\t reason: 'StrategyAdjustment' board is locked\n");
 			   break;
 		   case MB_ERR_MEMALLOC:
 			   fprintf(stderr, "\t reason: out of memory\n");
@@ -445,6 +495,43 @@ printf("Iterations: %i\n", iteration_total);
 			   #endif
 		}
 		
+		/* Start sync message boards that don't write */
+		if(FLAME_StrategyAdjustment_message_board_write == 0)
+		{
+			/*printf("%d> StrategyAdjustment message board sync start early as no agents sending any messages of this type\n", node_number);*/
+			
+			/* ********** sync message board here **********  */
+			if(FLAME_TEST_PRINT_START_AND_END_OF_LIBMBOARD_CALLS) printf("start MB_SyncStart(b_StrategyAdjustment)\n");
+			rc = MB_SyncStart(b_StrategyAdjustment);
+			if(FLAME_TEST_PRINT_START_AND_END_OF_LIBMBOARD_CALLS) printf("finish MB_SyncStart(b_StrategyAdjustment)\n");
+			#ifdef ERRCHECK
+			if (rc != MB_SUCCESS)
+			{
+			   fprintf(stderr, "ERROR: Could not start sync of 'StrategyAdjustment' board\n");
+			   switch(rc) {
+				   case MB_ERR_INVALID:
+					   fprintf(stderr, "\t reason: 'StrategyAdjustment' board is invalid\n");
+					   break;
+				   case MB_ERR_LOCKED:
+					   fprintf(stderr, "\t reason: 'StrategyAdjustment' board is locked\n");
+					   break;
+				   case MB_ERR_MEMALLOC:
+					   fprintf(stderr, "\t reason: out of memory\n");
+					   break;
+				   case MB_ERR_INTERNAL:
+					   fprintf(stderr, "\t reason: internal error. Recompile libmoard in debug mode for more info \n");
+					   break;
+				   default:
+					   fprintf(stderr, "\t MB_SyncStart returned error code: %d (see libmboard docs for details)\n", rc);
+					   break;
+			   }
+			   
+					   
+					   exit(rc);
+			   }
+			   #endif
+		}
+		
 		
 
 	if(FLAME_TEST_PRINT_START_AND_END_OF_MODEL_FUNCTIONS) printf("start b_send_message\n");
@@ -457,6 +544,7 @@ printf("Iterations: %i\n", iteration_total);
 		/* For backwards compatibility set current_xmachine */
 		current_xmachine->xmachine_buyer = NULL;
 		current_xmachine->xmachine_firm = NULL;
+		current_xmachine->xmachine_overseer = NULL;
 		current_xmachine->xmachine_buyer = current_xmachine_buyer;
 
 		
@@ -529,6 +617,7 @@ printf("Iterations: %i\n", iteration_total);
 		/* For backwards compatibility set current_xmachine */
 		current_xmachine->xmachine_buyer = NULL;
 		current_xmachine->xmachine_firm = NULL;
+		current_xmachine->xmachine_overseer = NULL;
 		current_xmachine->xmachine_firm = current_xmachine_firm;
 
 		
@@ -606,6 +695,7 @@ printf("Iterations: %i\n", iteration_total);
 		/* For backwards compatibility set current_xmachine */
 		current_xmachine->xmachine_buyer = NULL;
 		current_xmachine->xmachine_firm = NULL;
+		current_xmachine->xmachine_overseer = NULL;
 		current_xmachine->xmachine_firm = current_xmachine_firm;
 
 		
@@ -766,10 +856,11 @@ if(FLAME_Purchase_message_board_read == 0)
 	{
 		temp_xmachine_firm_holder = current_xmachine_firm_holder->next;
 		current_xmachine_firm = current_xmachine_firm_holder->agent;
-		current_xmachine_firm_next_state = firm_end_state;
+		current_xmachine_firm_next_state = firm_03_state;
 		/* For backwards compatibility set current_xmachine */
 		current_xmachine->xmachine_buyer = NULL;
 		current_xmachine->xmachine_firm = NULL;
+		current_xmachine->xmachine_overseer = NULL;
 		current_xmachine->xmachine_firm = current_xmachine_firm;
 
 		
@@ -786,7 +877,7 @@ if(FLAME_Purchase_message_board_read == 0)
 			}
 			else
 			{
-				transition_firm_agent(current_xmachine_firm_holder, firm_02_state, firm_end_state);
+				transition_firm_agent(current_xmachine_firm_holder, firm_02_state, firm_03_state);
 			}
 		
 
@@ -882,6 +973,7 @@ if(FLAME_Purchase_message_board_read == 0)
 		/* For backwards compatibility set current_xmachine */
 		current_xmachine->xmachine_buyer = NULL;
 		current_xmachine->xmachine_firm = NULL;
+		current_xmachine->xmachine_overseer = NULL;
 		current_xmachine->xmachine_buyer = current_xmachine_buyer;
 
 		
@@ -970,6 +1062,102 @@ if(FLAME_Purchase_message_board_read == 0)
 	if(FLAME_TEST_PRINT_START_AND_END_OF_MODEL_FUNCTIONS) printf("finish b_receive_messages\n");
 
 
+	if(FLAME_TEST_PRINT_START_AND_END_OF_MODEL_FUNCTIONS) printf("start o_receive_messages\n");
+	current_xmachine_overseer_holder = overseer_start_state->agents;
+	while(current_xmachine_overseer_holder)
+	{
+		temp_xmachine_overseer_holder = current_xmachine_overseer_holder->next;
+		current_xmachine_overseer = current_xmachine_overseer_holder->agent;
+		current_xmachine_overseer_next_state = overseer_01_state;
+		/* For backwards compatibility set current_xmachine */
+		current_xmachine->xmachine_buyer = NULL;
+		current_xmachine->xmachine_firm = NULL;
+		current_xmachine->xmachine_overseer = NULL;
+		current_xmachine->xmachine_overseer = current_xmachine_overseer;
+
+		
+
+		
+		
+		
+		  rc = MB_Iterator_Create(b_PurchaseQuality, &i_PurchaseQuality);
+		  
+		
+		#ifdef ERRCHECK
+		if (rc != MB_SUCCESS)
+		{
+		   fprintf(stderr, "ERROR: Could not create Iterator for 'PurchaseQuality'\n");
+		   switch(rc) {
+		       case MB_ERR_INVALID:
+		           fprintf(stderr, "\t reason: 'PurchaseQuality' board is invalid\n");
+		           break;
+		       case MB_ERR_LOCKED:
+	               fprintf(stderr, "\t reason: 'PurchaseQuality' board is locked\n");
+	               break;
+	           case MB_ERR_MEMALLOC:
+	               fprintf(stderr, "\t reason: out of memory\n");
+	               break;
+	           case MB_ERR_INTERNAL:
+	               fprintf(stderr, "\t reason: internal error. Recompile libmoard in debug mode for more info \n");
+	               break;
+	           default:
+	           
+               
+                   fprintf(stderr, "\t MB_Iterator_Create returned error code: %d (see libmboard docs for details)\n", rc);
+               
+                   break;
+		   }
+
+		   
+           exit(rc);
+		}
+		#endif
+		
+		
+
+			i = o_receive_messages();
+
+		
+		    rc = MB_Iterator_Delete(&i_PurchaseQuality);
+		    #ifdef ERRCHECK
+		    if (rc != MB_SUCCESS)
+		    {
+		       fprintf(stderr, "ERROR: Could not delete 'PurchaseQuality' iterator\n");
+		       switch(rc) {
+		           case MB_ERR_INVALID:
+		               fprintf(stderr, "\t reason: 'PurchaseQuality' iterator is invalid\n");
+		               break;
+		           case MB_ERR_INTERNAL:
+		               fprintf(stderr, "\t reason: internal error. Recompile libmoard in debug mode for more info \n");
+		               break;
+		           default:
+                       fprintf(stderr, "\t MB_Iterator_Delete returned error code: %d (see libmboard docs for details)\n", rc);
+                       break;
+		       }
+
+		       
+               exit(rc);
+		    }
+		    #endif
+		
+
+			if(i == 1)
+			{
+				free_overseer_agent(current_xmachine_overseer_holder, overseer_start_state);
+			}
+			else
+			{
+				transition_overseer_agent(current_xmachine_overseer_holder, overseer_start_state, overseer_01_state);
+			}
+		
+
+		current_xmachine_overseer = NULL;
+
+		current_xmachine_overseer_holder = temp_xmachine_overseer_holder;
+	}
+	if(FLAME_TEST_PRINT_START_AND_END_OF_MODEL_FUNCTIONS) printf("finish o_receive_messages\n");
+
+
 /* End of layer number 3 */
 
 /* Clear message boards that have finished being used
@@ -1036,6 +1224,285 @@ if(FLAME_PurchaseQuality_message_board_read == 0)
     #endif
 
 
+	if(FLAME_TEST_PRINT_START_AND_END_OF_MODEL_FUNCTIONS) printf("start o_send_message\n");
+	current_xmachine_overseer_holder = overseer_01_state->agents;
+	while(current_xmachine_overseer_holder)
+	{
+		temp_xmachine_overseer_holder = current_xmachine_overseer_holder->next;
+		current_xmachine_overseer = current_xmachine_overseer_holder->agent;
+		current_xmachine_overseer_next_state = overseer_end_state;
+		/* For backwards compatibility set current_xmachine */
+		current_xmachine->xmachine_buyer = NULL;
+		current_xmachine->xmachine_firm = NULL;
+		current_xmachine->xmachine_overseer = NULL;
+		current_xmachine->xmachine_overseer = current_xmachine_overseer;
+
+		if(FLAME_condition_overseer_o_send_message_01_end(current_xmachine_overseer)==1)
+		{
+
+		
+
+			i = o_send_message();
+
+		
+
+			if(i == 1)
+			{
+				free_overseer_agent(current_xmachine_overseer_holder, overseer_01_state);
+			}
+			else
+			{
+				transition_overseer_agent(current_xmachine_overseer_holder, overseer_01_state, overseer_end_state);
+			}
+		}
+
+		current_xmachine_overseer = NULL;
+
+		current_xmachine_overseer_holder = temp_xmachine_overseer_holder;
+	}
+	if(FLAME_TEST_PRINT_START_AND_END_OF_MODEL_FUNCTIONS) printf("finish o_send_message\n");
+
+	if(FLAME_StrategyAdjustment_message_board_write == 1)
+	{
+
+		if(FLAME_TEST_PRINT_START_AND_END_OF_LIBMBOARD_CALLS) printf("start MB_SyncStart(b_StrategyAdjustment)\n");
+		rc = MB_SyncStart(b_StrategyAdjustment);
+		if(FLAME_TEST_PRINT_START_AND_END_OF_LIBMBOARD_CALLS) printf("finish MB_SyncStart(b_StrategyAdjustment)\n");
+		#ifdef ERRCHECK
+		if (rc != MB_SUCCESS)
+		{
+		   fprintf(stderr, "ERROR: Could not start sync of 'StrategyAdjustment' board\n");
+		   switch(rc) {
+			   case MB_ERR_INVALID:
+				   fprintf(stderr, "\t reason: 'StrategyAdjustment' board is invalid\n");
+				   break;
+			   case MB_ERR_LOCKED:
+				   fprintf(stderr, "\t reason: 'StrategyAdjustment' board is locked\n");
+				   break;
+			   case MB_ERR_MEMALLOC:
+				   fprintf(stderr, "\t reason: out of memory\n");
+				   break;
+			   case MB_ERR_INTERNAL:
+				   fprintf(stderr, "\t reason: internal error. Recompile libmoard in debug mode for more info \n");
+				   break;
+			   default:
+				   fprintf(stderr, "\t MB_SyncStart returned error code: %d (see libmboard docs for details)\n", rc);
+				   break;
+		   }
+
+			
+			exit(rc);
+		}
+		#endif
+    }
+    
+
+
+/* End of layer number 4 */
+
+/* Clear message boards that have finished being used
+ * and sync complete if doing late sync complete */
+
+
+	/* If mb is not read then leave sync complete until last possible moment */
+	if(FLAME_StrategyAdjustment_message_board_read == 1)
+	{
+		if(FLAME_TEST_PRINT_START_AND_END_OF_LIBMBOARD_CALLS) printf("start MB_SyncComplete(b_StrategyAdjustment)\n");
+		rc = MB_SyncComplete(b_StrategyAdjustment);
+		if(FLAME_TEST_PRINT_START_AND_END_OF_LIBMBOARD_CALLS) printf("finsh MB_SyncComplete(b_StrategyAdjustment)\n");
+		#ifdef ERRCHECK
+		if (rc != MB_SUCCESS)
+		{
+		   fprintf(stderr, "ERROR: Could not complete sync of 'StrategyAdjustment' board\n");
+		   switch(rc) {
+				case MB_ERR_INVALID:
+				   fprintf(stderr, "\t reason: 'StrategyAdjustment' board is invalid\n");
+				   break;
+			   case MB_ERR_MEMALLOC:
+				   fprintf(stderr, "\t reason: out of memory\n");
+				   break;
+			   case MB_ERR_INTERNAL:
+				   fprintf(stderr, "\t reason: internal error. Recompile libmoard in debug mode for more info \n");
+				   break;
+			   default:
+				   fprintf(stderr, "\t MB_SyncComplete returned error code: %d (see libmboard docs for details)\n", rc);
+				   break;
+		   }
+	
+		   
+		   exit(rc);
+		}
+		#endif
+    
+    
+    
+	}
+	
+	if(FLAME_TEST_PRINT_START_AND_END_OF_MODEL_FUNCTIONS) printf("start f_receive_strategy\n");
+	current_xmachine_firm_holder = firm_03_state->agents;
+	while(current_xmachine_firm_holder)
+	{
+		temp_xmachine_firm_holder = current_xmachine_firm_holder->next;
+		current_xmachine_firm = current_xmachine_firm_holder->agent;
+		current_xmachine_firm_next_state = firm_end_state;
+		/* For backwards compatibility set current_xmachine */
+		current_xmachine->xmachine_buyer = NULL;
+		current_xmachine->xmachine_firm = NULL;
+		current_xmachine->xmachine_overseer = NULL;
+		current_xmachine->xmachine_firm = current_xmachine_firm;
+
+		
+
+		
+		
+          
+                  
+          
+		    rc = MB_Iterator_CreateFiltered(b_StrategyAdjustment, &i_StrategyAdjustment, &FLAME_filter_firm_f_receive_strategy_03_end_StrategyAdjustment, current_xmachine_firm);
+		    
+		  
+		
+		#ifdef ERRCHECK
+		if (rc != MB_SUCCESS)
+		{
+		   fprintf(stderr, "ERROR: Could not create Iterator for 'StrategyAdjustment'\n");
+		   switch(rc) {
+		       case MB_ERR_INVALID:
+		           fprintf(stderr, "\t reason: 'StrategyAdjustment' board is invalid\n");
+		           break;
+		       case MB_ERR_LOCKED:
+	               fprintf(stderr, "\t reason: 'StrategyAdjustment' board is locked\n");
+	               break;
+	           case MB_ERR_MEMALLOC:
+	               fprintf(stderr, "\t reason: out of memory\n");
+	               break;
+	           case MB_ERR_INTERNAL:
+	               fprintf(stderr, "\t reason: internal error. Recompile libmoard in debug mode for more info \n");
+	               break;
+	           default:
+	           
+                   fprintf(stderr, "\t MB_Iterator_CreateFiltered returned error code: %d (see libmboard docs for details)\n", rc);
+               
+               
+                   break;
+		   }
+
+		   
+           exit(rc);
+		}
+		#endif
+		
+		
+
+			i = f_receive_strategy();
+
+		
+		    rc = MB_Iterator_Delete(&i_StrategyAdjustment);
+		    #ifdef ERRCHECK
+		    if (rc != MB_SUCCESS)
+		    {
+		       fprintf(stderr, "ERROR: Could not delete 'StrategyAdjustment' iterator\n");
+		       switch(rc) {
+		           case MB_ERR_INVALID:
+		               fprintf(stderr, "\t reason: 'StrategyAdjustment' iterator is invalid\n");
+		               break;
+		           case MB_ERR_INTERNAL:
+		               fprintf(stderr, "\t reason: internal error. Recompile libmoard in debug mode for more info \n");
+		               break;
+		           default:
+                       fprintf(stderr, "\t MB_Iterator_Delete returned error code: %d (see libmboard docs for details)\n", rc);
+                       break;
+		       }
+
+		       
+               exit(rc);
+		    }
+		    #endif
+		
+
+			if(i == 1)
+			{
+				free_firm_agent(current_xmachine_firm_holder, firm_03_state);
+			}
+			else
+			{
+				transition_firm_agent(current_xmachine_firm_holder, firm_03_state, firm_end_state);
+			}
+		
+
+		current_xmachine_firm = NULL;
+
+		current_xmachine_firm_holder = temp_xmachine_firm_holder;
+	}
+	if(FLAME_TEST_PRINT_START_AND_END_OF_MODEL_FUNCTIONS) printf("finish f_receive_strategy\n");
+
+
+/* End of layer number 5 */
+
+/* Clear message boards that have finished being used
+ * and sync complete if doing late sync complete */
+
+if(FLAME_StrategyAdjustment_message_board_read == 0)
+{
+	/*printf("%d> StrategyAdjustment message board sync complete late as no agents reading any messages of this type\n", node_number);*/
+	
+	if(FLAME_TEST_PRINT_START_AND_END_OF_LIBMBOARD_CALLS) printf("start MB_SyncComplete(b_StrategyAdjustment)\n");
+	rc = MB_SyncComplete(b_StrategyAdjustment);
+	if(FLAME_TEST_PRINT_START_AND_END_OF_LIBMBOARD_CALLS) printf("finsh MB_SyncComplete(b_StrategyAdjustment)\n");
+	#ifdef ERRCHECK
+	if (rc != MB_SUCCESS)
+	{
+	   fprintf(stderr, "ERROR: Could not complete sync of 'StrategyAdjustment' board\n");
+	   switch(rc) {
+			case MB_ERR_INVALID:
+			   fprintf(stderr, "\t reason: 'StrategyAdjustment' board is invalid\n");
+			   break;
+		   case MB_ERR_MEMALLOC:
+			   fprintf(stderr, "\t reason: out of memory\n");
+			   break;
+		   case MB_ERR_INTERNAL:
+			   fprintf(stderr, "\t reason: internal error. Recompile libmoard in debug mode for more info \n");
+			   break;
+		   default:
+			   fprintf(stderr, "\t MB_SyncComplete returned error code: %d (see libmboard docs for details)\n", rc);
+			   break;
+	   }
+
+	   
+	   exit(rc);
+	}
+	#endif
+}
+
+    /* Delete any search trees */
+
+    rc = MB_Clear(b_StrategyAdjustment);
+    #ifdef ERRCHECK
+    if (rc != MB_SUCCESS)
+    {
+       fprintf(stderr, "ERROR: Could not clear 'StrategyAdjustment' board\n");
+       switch(rc) {
+           case MB_ERR_INVALID:
+               fprintf(stderr, "\t reason: 'StrategyAdjustment' board is invalid\n");
+               break;
+           case MB_ERR_LOCKED:
+               fprintf(stderr, "\t reason: 'StrategyAdjustment' board is locked\n");
+               break;
+           case MB_ERR_INTERNAL:
+               fprintf(stderr, "\t reason: internal error. Recompile libmoard in debug mode for more info \n");
+               break;
+           default:
+               fprintf(stderr, "\t MB_Clear returned error code: %d (see libmboard docs for details)\n", rc);
+               break;
+
+       }
+
+       
+       exit(rc);
+    }
+    #endif
+
+
 
 	/*printf("buyer_start_state->count = %d\n", buyer_start_state->count);*/
 	buyer_start_state->count = 0;
@@ -1046,17 +1513,29 @@ if(FLAME_PurchaseQuality_message_board_read == 0)
 	/*printf("buyer_01_state->count = %d\n", buyer_01_state->count);*/
 	buyer_01_state->count = 0;
 
+	/*printf("firm_end_state->count = %d\n", firm_end_state->count);*/
+	firm_end_state->count = 0;
+
 	/*printf("firm_01_state->count = %d\n", firm_01_state->count);*/
 	firm_01_state->count = 0;
 
 	/*printf("firm_start_state->count = %d\n", firm_start_state->count);*/
 	firm_start_state->count = 0;
 
-	/*printf("firm_end_state->count = %d\n", firm_end_state->count);*/
-	firm_end_state->count = 0;
+	/*printf("firm_03_state->count = %d\n", firm_03_state->count);*/
+	firm_03_state->count = 0;
 
 	/*printf("firm_02_state->count = %d\n", firm_02_state->count);*/
 	firm_02_state->count = 0;
+
+	/*printf("overseer_end_state->count = %d\n", overseer_end_state->count);*/
+	overseer_end_state->count = 0;
+
+	/*printf("overseer_01_state->count = %d\n", overseer_01_state->count);*/
+	overseer_01_state->count = 0;
+
+	/*printf("overseer_start_state->count = %d\n", overseer_start_state->count);*/
+	overseer_start_state->count = 0;
 
 	/* Move agents to their start states */
 
@@ -1076,6 +1555,15 @@ if(FLAME_PurchaseQuality_message_board_read == 0)
 		transition_firm_agent(current_xmachine_firm_holder, firm_end_state, firm_start_state);
 
 		current_xmachine_firm_holder = temp_xmachine_firm_holder;
+	}
+
+	current_xmachine_overseer_holder = overseer_end_state->agents;
+	while(current_xmachine_overseer_holder)
+	{
+		temp_xmachine_overseer_holder = current_xmachine_overseer_holder->next;
+		transition_overseer_agent(current_xmachine_overseer_holder, overseer_end_state, overseer_start_state);
+
+		current_xmachine_overseer_holder = temp_xmachine_overseer_holder;
 	}
 
     if(iteration_loop%output_frequency == output_offset)

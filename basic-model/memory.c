@@ -43,7 +43,7 @@ void unittest_b_send_message_start_01()
 	//return b_send_message();
 }
 
-void unittest_f_send_message_02_end()
+void unittest_f_send_message_02_03()
 {
 	
 	
@@ -87,6 +87,73 @@ void unittest_f_receive_messages_01_02()
 	//return f_receive_messages();
 }
 
+void unittest_f_receive_strategy_03_end()
+{
+	int rc;
+	
+	rc = MB_Iterator_CreateFiltered(b_StrategyAdjustment, &i_StrategyAdjustment, &FLAME_filter_firm_f_receive_strategy_03_end_StrategyAdjustment, current_xmachine_firm);
+	
+	#ifdef ERRCHECK
+	if (rc != MB_SUCCESS)
+	{
+	   fprintf(stderr, "ERROR: Could not create Iterator for 'StrategyAdjustment'\n");
+	   switch(rc) {
+	       case MB_ERR_INVALID:
+	           fprintf(stderr, "\t reason: 'StrategyAdjustment' board is invalid\n");
+	           break;
+	       case MB_ERR_LOCKED:
+               fprintf(stderr, "\t reason: 'StrategyAdjustment' board is locked\n");
+               break;
+           case MB_ERR_MEMALLOC:
+               fprintf(stderr, "\t reason: out of memory\n");
+               break;
+           case MB_ERR_INTERNAL:
+               fprintf(stderr, "\t reason: internal error. Recompile libmoard in debug mode for more info \n");
+               break;
+	   }
+	}
+	#endif
+	
+	//return f_receive_strategy();
+}
+
+void unittest_o_receive_messages_start_01()
+{
+	int rc;
+	
+	
+	rc = MB_Iterator_Create(b_PurchaseQuality, &i_PurchaseQuality);
+	#ifdef ERRCHECK
+	if (rc != MB_SUCCESS)
+	{
+	   fprintf(stderr, "ERROR: Could not create Iterator for 'PurchaseQuality'\n");
+	   switch(rc) {
+	       case MB_ERR_INVALID:
+	           fprintf(stderr, "\t reason: 'PurchaseQuality' board is invalid\n");
+	           break;
+	       case MB_ERR_LOCKED:
+               fprintf(stderr, "\t reason: 'PurchaseQuality' board is locked\n");
+               break;
+           case MB_ERR_MEMALLOC:
+               fprintf(stderr, "\t reason: out of memory\n");
+               break;
+           case MB_ERR_INTERNAL:
+               fprintf(stderr, "\t reason: internal error. Recompile libmoard in debug mode for more info \n");
+               break;
+	   }
+	}
+	#endif
+	
+	//return o_receive_messages();
+}
+
+void unittest_o_send_message_01_end()
+{
+	
+	
+	//return o_send_message();
+}
+
 
 void free_messages()
 {
@@ -128,6 +195,31 @@ void free_messages()
 	               break;
 	           case MB_ERR_LOCKED:
 	               fprintf(stderr, "\t reason: 'Purchase' board is locked\n");
+	               break;
+	           case MB_ERR_INTERNAL:
+	               fprintf(stderr, "\t reason: internal error. Recompile libmoard in debug mode for more info \n");
+	               break;
+	           default:
+                   fprintf(stderr, "\t MB_Clear returned error code: %d (see libmboard docs for details)\n", rc);
+                   break;
+	       }
+
+	       
+       	   exit(rc);
+	    }
+	    #endif
+	
+	    rc = MB_Clear(b_StrategyAdjustment);
+	    #ifdef ERRCHECK
+	    if (rc != MB_SUCCESS)
+	    {
+	       fprintf(stderr, "ERROR: Could not clear 'StrategyAdjustment' board\n");
+	       switch(rc) {
+	           case MB_ERR_INVALID:
+	               fprintf(stderr, "\t reason: 'StrategyAdjustment' board is invalid\n");
+	               break;
+	           case MB_ERR_LOCKED:
+	               fprintf(stderr, "\t reason: 'StrategyAdjustment' board is locked\n");
 	               break;
 	           case MB_ERR_INTERNAL:
 	               fprintf(stderr, "\t reason: internal error. Recompile libmoard in debug mode for more info \n");
@@ -207,19 +299,55 @@ int rc;
 	    }
 	    #endif
 	
+	/* Initialise message sync composite params as NULL */
+	FLAME_m_StrategyAdjustment_composite_params = NULL;
+
+	    rc = MB_Create(&b_StrategyAdjustment, sizeof(m_StrategyAdjustment));
+	    #ifdef ERRCHECK
+	    if (rc != MB_SUCCESS)
+	    {
+	       fprintf(stderr, "ERROR: Could not create 'StrategyAdjustment' board\n");
+	       switch(rc) {
+	           case MB_ERR_INVALID:
+	               fprintf(stderr, "\t reason: Invalid message size\n");
+	               break;
+	           case MB_ERR_MEMALLOC:
+	               fprintf(stderr, "\t reason: out of memory\n");
+	               break;
+	           case MB_ERR_INTERNAL:
+	               fprintf(stderr, "\t reason: internal error. Recompile libmoard in debug mode for more info \n");
+	               break;
+	           default:
+                   fprintf(stderr, "\t MB_Create returned error code: %d (see libmboard docs for details)\n", rc);
+                   break;
+	       }
+
+	       
+       	   exit(rc);
+	    }
+	    #endif
+	
 	buyer_start_state = init_buyer_state();
 
 	buyer_end_state = init_buyer_state();
 
 	buyer_01_state = init_buyer_state();
 
+	firm_end_state = init_firm_state();
+
 	firm_01_state = init_firm_state();
 
 	firm_start_state = init_firm_state();
 
-	firm_end_state = init_firm_state();
+	firm_03_state = init_firm_state();
 
 	firm_02_state = init_firm_state();
+
+	overseer_end_state = init_overseer_state();
+
+	overseer_01_state = init_overseer_state();
+
+	overseer_start_state = init_overseer_state();
 
 	temp_node_info = NULL;
 	p_node_info = &temp_node_info;
@@ -570,6 +698,14 @@ void unittest_free_firm_agent()
 
 void free_firm_agents()
 {
+	current_xmachine_firm_holder = firm_end_state->agents;
+	while(current_xmachine_firm_holder)
+	{
+		temp_xmachine_firm_holder = current_xmachine_firm_holder->next;
+		free_firm_agent(current_xmachine_firm_holder, firm_end_state);
+		current_xmachine_firm_holder = temp_xmachine_firm_holder;
+	}
+	firm_end_state->count = 0;
 	current_xmachine_firm_holder = firm_01_state->agents;
 	while(current_xmachine_firm_holder)
 	{
@@ -586,14 +722,14 @@ void free_firm_agents()
 		current_xmachine_firm_holder = temp_xmachine_firm_holder;
 	}
 	firm_start_state->count = 0;
-	current_xmachine_firm_holder = firm_end_state->agents;
+	current_xmachine_firm_holder = firm_03_state->agents;
 	while(current_xmachine_firm_holder)
 	{
 		temp_xmachine_firm_holder = current_xmachine_firm_holder->next;
-		free_firm_agent(current_xmachine_firm_holder, firm_end_state);
+		free_firm_agent(current_xmachine_firm_holder, firm_03_state);
 		current_xmachine_firm_holder = temp_xmachine_firm_holder;
 	}
-	firm_end_state->count = 0;
+	firm_03_state->count = 0;
 	current_xmachine_firm_holder = firm_02_state->agents;
 	while(current_xmachine_firm_holder)
 	{
@@ -606,9 +742,10 @@ void free_firm_agents()
 
 void free_firm_states()
 {
+	free(firm_end_state);
 	free(firm_01_state);
 	free(firm_start_state);
-	free(firm_end_state);
+	free(firm_03_state);
 	free(firm_02_state);
 }
 
@@ -659,6 +796,134 @@ void add_firm_agent(int buyer_ids[], int my_id, float quality, int stored_id)
 	current->stored_id = stored_id;
 }
 
+xmachine_memory_overseer_state * init_overseer_state()
+{
+	xmachine_memory_overseer_state * current = (xmachine_memory_overseer_state *)malloc(sizeof(xmachine_memory_overseer_state));
+	CHECK_POINTER(current);
+
+	current->agents = NULL;
+	current->count = 0;
+
+	return current;
+}
+
+xmachine_memory_overseer * init_overseer_agent()
+{
+	xmachine_memory_overseer * current = (xmachine_memory_overseer *)malloc(sizeof(xmachine_memory_overseer));
+	CHECK_POINTER(current);
+
+	init_int_static_array(current->firm_revenues, 10);
+	init_float_static_array(current->firm_strategies, 10);
+
+	return current;
+}
+
+void free_overseer_agent(xmachine_memory_overseer_holder * tmp, xmachine_memory_overseer_state * state)
+{
+	if(tmp->prev == NULL) state->agents = tmp->next;
+	else tmp->prev->next = tmp->next;
+	if(tmp->next != NULL) tmp->next->prev = tmp->prev;
+
+	
+
+	free(tmp->agent);
+	free(tmp);
+}
+
+void unittest_init_overseer_agent()
+{
+	current_xmachine_overseer = (xmachine_memory_overseer *)malloc(sizeof(xmachine_memory_overseer));
+	CHECK_POINTER(current);
+
+		init_int_static_array(current_xmachine_overseer->firm_revenues, 10);
+		init_float_static_array(current_xmachine_overseer->firm_strategies, 10);
+	
+}
+
+void unittest_free_overseer_agent()
+{
+	
+	free(current_xmachine_overseer);
+}
+
+void free_overseer_agents()
+{
+	current_xmachine_overseer_holder = overseer_end_state->agents;
+	while(current_xmachine_overseer_holder)
+	{
+		temp_xmachine_overseer_holder = current_xmachine_overseer_holder->next;
+		free_overseer_agent(current_xmachine_overseer_holder, overseer_end_state);
+		current_xmachine_overseer_holder = temp_xmachine_overseer_holder;
+	}
+	overseer_end_state->count = 0;
+	current_xmachine_overseer_holder = overseer_01_state->agents;
+	while(current_xmachine_overseer_holder)
+	{
+		temp_xmachine_overseer_holder = current_xmachine_overseer_holder->next;
+		free_overseer_agent(current_xmachine_overseer_holder, overseer_01_state);
+		current_xmachine_overseer_holder = temp_xmachine_overseer_holder;
+	}
+	overseer_01_state->count = 0;
+	current_xmachine_overseer_holder = overseer_start_state->agents;
+	while(current_xmachine_overseer_holder)
+	{
+		temp_xmachine_overseer_holder = current_xmachine_overseer_holder->next;
+		free_overseer_agent(current_xmachine_overseer_holder, overseer_start_state);
+		current_xmachine_overseer_holder = temp_xmachine_overseer_holder;
+	}
+	overseer_start_state->count = 0;
+}
+
+void free_overseer_states()
+{
+	free(overseer_end_state);
+	free(overseer_01_state);
+	free(overseer_start_state);
+}
+
+void transition_overseer_agent(xmachine_memory_overseer_holder * tmp, xmachine_memory_overseer_state * from_state, xmachine_memory_overseer_state * to_state)
+{
+	if(tmp->prev == NULL) from_state->agents = tmp->next;
+	else tmp->prev->next = tmp->next;
+	if(tmp->next != NULL) tmp->next->prev = tmp->prev;
+
+	add_overseer_agent_internal(tmp->agent, to_state);
+	free(tmp);
+}
+
+void add_overseer_agent_internal(xmachine_memory_overseer * agent, xmachine_memory_overseer_state * state)
+{
+	xmachine_memory_overseer_holder * current = (xmachine_memory_overseer_holder *)malloc(sizeof(xmachine_memory_overseer_holder));
+	CHECK_POINTER(current);
+
+	current->next = state->agents;
+	current->prev = NULL;
+	state->agents = current;
+	if(current->next != NULL) current->next->prev = current;
+	current->agent = agent;
+
+	state->count++;
+
+}
+
+/** \fn void add_overseer_agent(int firm_revenues[], float firm_strategies[])
+ * \brief Add overseer X-machine to the current being used X-machine list.
+ * \param firm_revenues Variable for the X-machine memory.
+ * \param firm_strategies Variable for the X-machine memory.
+ */
+void add_overseer_agent(int firm_revenues[], float firm_strategies[])
+{
+	xmachine_memory_overseer * current;
+
+	current = init_overseer_agent();
+	/* new line added to handle dynamic agent creation*/
+	current_xmachine_overseer_next_state = overseer_start_state;
+	add_overseer_agent_internal(current, current_xmachine_overseer_next_state);
+
+	memcpy(current->firm_revenues, firm_revenues, 10*sizeof(int));
+	memcpy(current->firm_strategies, firm_strategies, 10*sizeof(float));
+}
+
 
 /* freexmachines */
 /** \fn void freexmachines()
@@ -668,6 +933,7 @@ void freexmachines()
 {
 	free_buyer_agents();
 	free_firm_agents();
+	free_overseer_agents();
 	
 }
 
@@ -797,6 +1063,32 @@ int get_stored_id()
     return (int)0;
 }
 
+/** \fn int get_firm_revenues()
+ * \brief Get firm_revenues memory variable from current X-machine.
+ * \return Value for variable.
+ */
+int * get_firm_revenues()
+{
+	if(current_xmachine->xmachine_overseer) return (*current_xmachine->xmachine_overseer).firm_revenues;
+
+    // suppress compiler warning by returning dummy value /
+    // this statement should rightfully NEVER be reached /
+    return NULL;
+}
+
+/** \fn float get_firm_strategies()
+ * \brief Get firm_strategies memory variable from current X-machine.
+ * \return Value for variable.
+ */
+float * get_firm_strategies()
+{
+	if(current_xmachine->xmachine_overseer) return (*current_xmachine->xmachine_overseer).firm_strategies;
+
+    // suppress compiler warning by returning dummy value /
+    // this statement should rightfully NEVER be reached /
+    return NULL;
+}
+
 
 /** \fn double agent_get_range()
  * \brief Fixed routine to get the range from current X-machine
@@ -807,6 +1099,7 @@ double agent_get_range()
     double value = 0.0;
     /*if (current_xmachine->xmachine_buyer) value = current_xmachine->xmachine_buyer->;*/
     /*if (current_xmachine->xmachine_firm) value = current_xmachine->xmachine_firm->;*/
+    /*if (current_xmachine->xmachine_overseer) value = current_xmachine->xmachine_overseer->;*/
 
     return value;
 }
@@ -820,6 +1113,7 @@ int agent_get_id()
     int value = 0;
     /*if (current_xmachine->xmachine_buyer) value = current_xmachine->xmachine_buyer->;*/
     /*if (current_xmachine->xmachine_firm) value = current_xmachine->xmachine_firm->;*/
+    /*if (current_xmachine->xmachine_overseer) value = current_xmachine->xmachine_overseer->;*/
 
     return value;
 }
@@ -833,6 +1127,7 @@ double agent_get_x()
     double value = 0.0;
     /*if (current_xmachine->xmachine_buyer) value = current_xmachine->xmachine_buyer->0.0;*/
     /*if (current_xmachine->xmachine_firm) value = current_xmachine->xmachine_firm->0.0;*/
+    /*if (current_xmachine->xmachine_overseer) value = current_xmachine->xmachine_overseer->0.0;*/
 
     return value;
 }
@@ -845,6 +1140,7 @@ double agent_get_y()
     double value = 0.0;
     /*if (current_xmachine->xmachine_buyer) value = current_xmachine->xmachine_buyer->0.0;*/
     /*if (current_xmachine->xmachine_firm) value = current_xmachine->xmachine_firm->0.0;*/
+    /*if (current_xmachine->xmachine_overseer) value = current_xmachine->xmachine_overseer->0.0;*/
 
     return value;
 }
@@ -899,6 +1195,7 @@ void add_node(int node_id, double minx, double maxx, double miny, double maxy, d
 	current->agents = NULL;
 	current->PurchaseQuality_messages = NULL;
 	current->Purchase_messages = NULL;
+	current->StrategyAdjustment_messages = NULL;
 
 
 	current->partition_data[0] = minx;
@@ -947,6 +1244,7 @@ void clean_up(int code)
 	/* Free agent states */
 	free_buyer_states();
 	free_firm_states();
+	free_overseer_states();
 
 
 	/* Free index maps */
@@ -990,6 +1288,31 @@ void clean_up(int code)
                break;
            case MB_ERR_LOCKED:
                fprintf(stderr, "\t reason: 'Purchase' board is locked\n");
+               break;
+           case MB_ERR_INTERNAL:
+               fprintf(stderr, "\t reason: internal error. Recompile libmoard in debug mode for more info \n");
+               break;
+	       default:
+               fprintf(stderr, "\t MB_Delete returned error code: %d (see libmboard docs for details)\n", rc);
+               break;
+	       }
+
+	       
+       	   exit(rc);
+    }
+    #endif
+
+	rc = MB_Delete(&b_StrategyAdjustment);
+	#ifdef ERRCHECK
+    if (rc != MB_SUCCESS)
+    {
+       fprintf(stderr, "ERROR: Could not delete 'StrategyAdjustment' board\n");
+       switch(rc) {
+           case MB_ERR_INVALID:
+               fprintf(stderr, "\t reason: 'StrategyAdjustment' board has not been created?\n");
+               break;
+           case MB_ERR_LOCKED:
+               fprintf(stderr, "\t reason: 'StrategyAdjustment' board is locked\n");
                break;
            case MB_ERR_INTERNAL:
                fprintf(stderr, "\t reason: internal error. Recompile libmoard in debug mode for more info \n");
@@ -1077,6 +1400,12 @@ void propagate_agents()
 		{
 			x_xmachine = current_xmachine->xmachine_firm->0.0;
 			y_xmachine = current_xmachine->xmachine_firm->0.0;
+			z_xmachine = 0.0;
+		}
+		else if(current_xmachine->xmachine_overseer != NULL)
+		{
+			x_xmachine = current_xmachine->xmachine_overseer->0.0;
+			y_xmachine = current_xmachine->xmachine_overseer->0.0;
 			z_xmachine = 0.0;
 		}
 

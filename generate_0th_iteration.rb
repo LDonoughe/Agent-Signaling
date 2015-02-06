@@ -32,6 +32,7 @@ end
 puts "<xagent>"
 puts "<name>overseer</name>"
 puts "<firm_revenues>{0,0,0,0,0,0,0,0,0,0}</firm_revenues>"
+puts "<firm_strategies>{0,0,0,0,0,0,0,0,0,0}</firm_strategies>"
 puts "</xagent>"
 #endstuff
 puts "</agents>"

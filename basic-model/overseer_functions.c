@@ -1,6 +1,6 @@
 #include "header.h"
 #include "overseer_agent_header.h"
-#include "mt19937arA.h"
+#include "mt19937arB.h"
 
 /*
  * \fn: int receive_messages()
@@ -8,24 +8,25 @@
  */
 int o_receive_messages() {
 	int i = 0;
-	FIRM_ID = 0;
-	QUALITY = 0;
-	RevenuePerUnit = 0;
+	int firm = 0;
+	int quality = 0;
+	int RevenuePerUnit = 0;
 
 	while (1 == 1) {
 
-		START_PURCHASE_MESSAGE_LOOP
-			FIRM_ID = PurchaseQuality_message->seller;
-			QUALITY = PurchaseQuality_message->qual;
-			i = FIRM_ID - 101; //firm ids are all plus 100
+		START_PURCHASEQUALITY_MESSAGE_LOOP
+			firm = PurchaseQuality_message->seller;
+			quality = PurchaseQuality_message->qual;
+			i = firm - 101; //firm ids are all plus 100
 			// printf("%d purchased from %d \n", STORED_ID, MY_ID);
-			if (QUALITY == 1) {
+			if (quality == 1) {
 				RevenuePerUnit = 1;
 			} else {
 				RevenuePerUnit = 5;
 			}
+			FIRM_STRATEGIES[i] = PurchaseQuality_message->strategy;
 			FIRM_REVENUES[i] = FIRM_REVENUES[i] + RevenuePerUnit;
-		FINISH_PURCHASE_MESSAGE_LOOP
+		FINISH_PURCHASEQUALITY_MESSAGE_LOOP
 		break;
 	}
 
@@ -37,7 +38,6 @@ int o_receive_messages() {
 //actually change this
 int o_send_message() {
 	int i;
-	int j;
 	int low, lower, lowest;
 	int fLow, fLower, fLowest;
 	int change, anchor;
@@ -66,10 +66,10 @@ int o_send_message() {
 		}
 	}
 
-	// The higher High Quality Probability is, the more unlikely it is to produce low quality goods.
+	// The higher High quality Probability is, the more unlikely it is to produce low quality goods.
 	for (i = 0; i < 3; i++) {
 		while (1 == 1) {
-			change = genrand_real1A();
+			change = genrand_real1B();
 			if (change <= 0.1) {
 				if (change >= -0.1) {
 					break;
@@ -78,15 +78,25 @@ int o_send_message() {
 		}
 		while (1 == 1) {
 			//anchor to random success
-
+			anchor = genrand_int32B()*(10.0/4294967295.0);
+			if (anchor != fLow) {
+				if (anchor != fLower) {
+					if (anchor != fLowest) {
+					break;
+					}
+				}
+			}
 		}
-		add_StrategyAdjustment_message(i + 101, );
+		if (i == 0) {
+			add_StrategyAdjustment_message(fLowest + 101, FIRM_STRATEGIES[anchor] + change);
+		}
+		if (i == 1) {
+			add_StrategyAdjustment_message(fLower + 101, FIRM_STRATEGIES[anchor] + change);
+		}
+		if (i == 2) {
+			add_StrategyAdjustment_message(fLow + 101, FIRM_STRATEGIES[anchor] + change);
+		}
 	}
 
-	if (genrand_real1A() > QUALITY) {
-		qual = 0;
-	} else {
-		qual = 1;
-	}
 	return 0;
 }

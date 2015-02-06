@@ -27,8 +27,8 @@ FLAME   = main.c memory.c xml.c messageboards.c partitioning.c rules.c timing.c
 AUX 	= stategraph.dot stategraph_colour.dot process_order_graph.dot Doxyfile latex.tex
 
 # FLAME generated model files
-SOURCES =  buyer_functions.c  firm_functions.c 
-HEADERS = header.h low_primes.h mboard.h  buyer_agent_header.h  firm_agent_header.h 
+SOURCES =  buyer_functions.c  firm_functions.c  overseer_functions.c 
+HEADERS = header.h low_primes.h mboard.h  buyer_agent_header.h  firm_agent_header.h  overseer_agent_header.h 
 
 DEPS    = Makefile header.h low_primes.h
 

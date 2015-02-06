@@ -12,16 +12,12 @@ int f_receive_messages() {
 
 
 	// Read messages of type message_z
-	while (1 == 1) {
-
 		START_PURCHASE_MESSAGE_LOOP
 			STORED_ID = Purchase_message->an_id;
 			// printf("%d purchased from %d \n", STORED_ID, MY_ID);
 			BUYER_IDS[i] = STORED_ID;
 			i++;
 		FINISH_PURCHASE_MESSAGE_LOOP
-		break;
-	}
 
 	for (i = i; i < 100; i++) {
 		BUYER_IDS[i] = 0;
@@ -46,8 +42,15 @@ int f_send_message() {
 		if (BUYER_IDS[i] == 0) {
 			break;
 		}
-		add_PurchaseQuality_message(qual, BUYER_IDS[i], MY_ID);
+		add_PurchaseQuality_message(qual, BUYER_IDS[i], MY_ID, QUALITY);
 	}
+	return 0;
+}
+
+int f_receive_strategy() {
+	START_STRATEGYADJUSTMENT_MESSAGE_LOOP
+		QUALITY = StrategyAdjustment_message->new_strategy;
+	FINISH_STRATEGYADJUSTMENT_MESSAGE_LOOP
 	return 0;
 }
 

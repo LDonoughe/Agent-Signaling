@@ -65,6 +65,18 @@ void* cparams_create(int agent_number, int * agent_count, size_t * agent_struct_
 }
 
 
+/** \fn int FLAME_condition_overseer_o_send_message_01_end(xmachine_memory_overseer *a)
+ * \brief The condition function for an agent function.
+ * \param a The agent memory.
+ * \return The success (1) or failure (0) of the condition.
+ */
+int FLAME_condition_overseer_o_send_message_01_end(xmachine_memory_overseer *a)
+{
+	if((iteration_loop%10 == 0)) return 1;
+	else return 0;
+}
+
+
 
 /** \fn int FLAME_filter_buyer_b_receive_messages_01_end_PurchaseQuality(const void *msg, const void *params)
  * \brief The filter function for a message input used in serial for each agent.
@@ -98,6 +110,26 @@ int FLAME_filter_firm_f_receive_messages_01_02_Purchase(const void *msg, const v
 	
 	/* Cast the message pointer to the correct message type */
 	m_Purchase *m = (m_Purchase*)msg;
+	/* Cast the params pointer to the correct agent type */
+	xmachine_memory_firm *a = (xmachine_memory_firm *)params;
+
+	/* The filter */
+	if((a->my_id == m->firm_id)) return 1;
+	else return 0;
+}
+
+/** \fn int FLAME_filter_firm_f_receive_strategy_03_end_StrategyAdjustment(const void *msg, const void *params)
+ * \brief The filter function for a message input used in serial for each agent.
+ * \param msg The pointer to the message to be filtered.
+ * \param params The pointer to the agent memory.
+ * \return The success (1) or failure (0) of the filter on the message.
+ */
+int FLAME_filter_firm_f_receive_strategy_03_end_StrategyAdjustment(const void *msg, const void *params)
+{
+	//printf("**** FLAME_filter_firm_f_receive_strategy_03_end_StrategyAdjustment(const void *msg, const void *params)\n");
+	
+	/* Cast the message pointer to the correct message type */
+	m_StrategyAdjustment *m = (m_StrategyAdjustment*)msg;
 	/* Cast the params pointer to the correct agent type */
 	xmachine_memory_firm *a = (xmachine_memory_firm *)params;
 

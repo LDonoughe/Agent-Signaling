@@ -365,6 +365,7 @@ int readAgentXML(char * location,
 	int FLAME_in_name = 0;
 	int in_buyer_agent = 0;
 	int in_firm_agent = 0;
+	int in_overseer_agent = 0;
 	
 	int in_my_id = 0;
 	int in_firm_id = 0;
@@ -372,9 +373,12 @@ int readAgentXML(char * location,
 	int in_buyer_ids = 0;
 	int in_quality = 0;
 	int in_stored_id = 0;
+	int in_firm_revenues = 0;
+	int in_firm_strategies = 0;
 	
 	xmachine_memory_buyer * current_buyer_agent = NULL;
 	xmachine_memory_firm * current_firm_agent = NULL;
+	xmachine_memory_overseer * current_overseer_agent = NULL;
 	
 	/* Things for round-robin partitioning */
 	int geometric = 1;
@@ -512,6 +516,55 @@ int readAgentXML(char * location,
 						}
 					}
 				}
+				else if(strcmp(agentname, "overseer") == 0)
+				{
+					if(current_overseer_agent == NULL) { printf("Memory error reading overseer agent\n"); exit(0); }
+					
+					posx = (double)0.0;
+					posy = (double)0.0;
+					posz = (double)0.0;
+					
+					/* If flag is zero just read the data. We'll partition later.
+					 * If flag is not zero we aleady have partition data so can read and distribute to the current node.*/
+					if( flag == 0 )
+					{
+						/* Next line should be commented out? */
+						add_overseer_agent_internal(current_overseer_agent, overseer_start_state);
+
+						/* Update the cloud data */
+						if ( posx < cloud_data[0] ) cloud_data[0] = posx;
+						if ( posx > cloud_data[1] ) cloud_data[1] = posx;
+						if ( posy < cloud_data[2] ) cloud_data[2] = posy;
+						if ( posy > cloud_data[3] ) cloud_data[3] = posy;
+						if ( posz < cloud_data[2] ) cloud_data[4] = posz;
+						if ( posz > cloud_data[3] ) cloud_data[5] = posz;
+					}
+					else
+					{
+						if(partition_method == geometric)
+						{
+							if (
+								((current_node->partition_data[0] == SPINF) || (current_node->partition_data[0] != SPINF && posx >= current_node->partition_data[0])) &&
+								((current_node->partition_data[1] == SPINF) || (current_node->partition_data[1] != SPINF && posx < current_node->partition_data[1])) &&
+								((current_node->partition_data[2] == SPINF) || (current_node->partition_data[2] != SPINF && posy >= current_node->partition_data[2])) &&
+								((current_node->partition_data[3] == SPINF) || (current_node->partition_data[3] != SPINF && posy < current_node->partition_data[3])) &&
+								((current_node->partition_data[4] == SPINF) || (current_node->partition_data[4] != SPINF && posz >= current_node->partition_data[4])) &&
+								((current_node->partition_data[5] == SPINF) || (current_node->partition_data[5] != SPINF && posz < current_node->partition_data[5]))
+							)
+							{
+								add_overseer_agent_internal(current_overseer_agent, overseer_start_state);
+							}
+						}
+						else if (partition_method == other)
+						{
+							if (agent_count % number_partitions == 0)
+							{
+								add_overseer_agent_internal(current_overseer_agent, overseer_start_state);
+							}
+							++agent_count;
+						}
+					}
+				}
 				else
 				{
 					printf("Warning: agent name undefined - '%s'\n", agentname);
@@ -521,6 +574,7 @@ int readAgentXML(char * location,
 				FLAME_in_xagent = 0;
 				in_buyer_agent = 0;
 				in_firm_agent = 0;
+				in_overseer_agent = 0;
 				
 			}
 			if(strcmp(buffer, "name") == 0) FLAME_in_name = 1;
@@ -537,6 +591,10 @@ int readAgentXML(char * location,
 			if(strcmp(buffer, "/quality") == 0) { in_quality = 0; }
 			if(strcmp(buffer, "stored_id") == 0) { in_stored_id = 1; }
 			if(strcmp(buffer, "/stored_id") == 0) { in_stored_id = 0; }
+			if(strcmp(buffer, "firm_revenues") == 0) { in_firm_revenues = 1; }
+			if(strcmp(buffer, "/firm_revenues") == 0) { in_firm_revenues = 0; }
+			if(strcmp(buffer, "firm_strategies") == 0) { in_firm_strategies = 1; }
+			if(strcmp(buffer, "/firm_strategies") == 0) { in_firm_strategies = 0; }
 			
 			index = 0;
 			buffer[index] = '\0';
@@ -562,6 +620,11 @@ int readAgentXML(char * location,
 						current_firm_agent = init_firm_agent();
 						in_firm_agent = 1;
 					}
+					else if(strcmp(agentname, "overseer") == 0)
+					{
+						current_overseer_agent = init_overseer_agent();
+						in_overseer_agent = 1;
+					}
 					else
 					{
 						printf("Warning: agent name undefined - '%s'\n", agentname);
@@ -581,6 +644,14 @@ int readAgentXML(char * location,
 					if(in_my_id) { current_firm_agent->my_id = atoi(buffer); }
 					if(in_quality) { current_firm_agent->quality = atof(buffer); }
 					if(in_stored_id) { current_firm_agent->stored_id = atoi(buffer); }
+				 }else if(in_overseer_agent == 1)
+				{
+					if(in_firm_revenues) { j = 0;
+						rc = read_int_static_array(buffer, index, &j, current_overseer_agent->firm_revenues, 10);
+						if(rc != 0) { printf("Error: reading 'overseer' agent variable 'firm_revenues' of type 'int'\n"); exit(0); } }
+					if(in_firm_strategies) { j = 0;
+						rc = read_float_static_array(buffer, index, &j, current_overseer_agent->firm_strategies, 10);
+						if(rc != 0) { printf("Error: reading 'overseer' agent variable 'firm_strategies' of type 'float'\n"); exit(0); } }
 				 }
 			}
 			index = 0;
@@ -881,6 +952,7 @@ void readinitialstates(char * filename, char * filelocation, int * itno, double 
 					{
 						if(strcmp("buyer", buffer) == 0) current_FLAME_output->type = 1;
 						else if(strcmp("firm", buffer) == 0) current_FLAME_output->type = 2;
+						else if(strcmp("overseer", buffer) == 0) current_FLAME_output->type = 3;
 						else 
 						{
 							printf("Error: output name is not an agent name: '%s'\n", buffer);
@@ -952,6 +1024,7 @@ void readinitialstates(char * filename, char * filelocation, int * itno, double 
 		if(current_FLAME_output->type == 0) printf("snapshot");
 		else if(current_FLAME_output->type == 1) printf("agent' name='buyer");
 		else if(current_FLAME_output->type == 2) printf("agent' name='firm");
+		else if(current_FLAME_output->type == 3) printf("agent' name='overseer");
 		else printf("undefined");
 		printf("' format='");
 		if(current_FLAME_output->format == 0) printf("xml");
@@ -1165,6 +1238,21 @@ void write_firm_agent(FILE *file, xmachine_memory_firm * current)
 	fputs("</xagent>\n", file);
 }
 
+void write_overseer_agent(FILE *file, xmachine_memory_overseer * current)
+{
+	char data[1000];
+	fputs("<xagent>\n" , file);
+	fputs("<name>overseer</name>\n", file);
+		fputs("<firm_revenues>", file);
+	write_int_static_array(file, current->firm_revenues, 10);
+	fputs("</firm_revenues>\n", file);
+		fputs("<firm_strategies>", file);
+	write_float_static_array(file, current->firm_strategies, 10);
+	fputs("</firm_strategies>\n", file);
+
+	fputs("</xagent>\n", file);
+}
+
 
 void FLAME_write_xml(char * location, int iteration_number, int * output_types, int output_type_size)
 {
@@ -1212,6 +1300,17 @@ void FLAME_write_xml(char * location, int iteration_number, int * output_types, 
 				write_firm_agent(file, current_xmachine_firm_holder->agent);
 
 				current_xmachine_firm_holder = current_xmachine_firm_holder->next;
+			}
+	}
+	
+	if(FLAME_integer_in_array(0, output_types, output_type_size) || FLAME_integer_in_array(3, output_types, output_type_size))
+	{
+		current_xmachine_overseer_holder = overseer_start_state->agents;
+			while(current_xmachine_overseer_holder)
+			{
+				write_overseer_agent(file, current_xmachine_overseer_holder->agent);
+
+				current_xmachine_overseer_holder = current_xmachine_overseer_holder->next;
 			}
 	}
 	
@@ -1280,6 +1379,24 @@ void saveiterationdata(int iteration_number)
 					/* Reinitialise agent size */
 					output_type_size = 0;
 					output_types[0] = 2;
+					
+					current_FLAME_output->flag = 1;
+					for(current_FLAME_output2 = FLAME_outputs; current_FLAME_output2 != NULL; current_FLAME_output2 = current_FLAME_output2->next)
+					{
+						if(current_FLAME_output2->flag == 0 && strcmp(current_FLAME_output->location, current_FLAME_output2->location) == 0)
+						{
+							output_types[++output_type_size] = current_FLAME_output2->type;
+							
+							current_FLAME_output2->flag = 1;
+						}
+					}
+					
+					FLAME_write_xml(current_FLAME_output->location, iteration_number, output_types, output_type_size);
+				}if(current_FLAME_output->type == 3)
+				{
+					/* Reinitialise agent size */
+					output_type_size = 0;
+					output_types[0] = 3;
 					
 					current_FLAME_output->flag = 1;
 					for(current_FLAME_output2 = FLAME_outputs; current_FLAME_output2 != NULL; current_FLAME_output2 = current_FLAME_output2->next)

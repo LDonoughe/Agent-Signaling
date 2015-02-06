@@ -54,11 +54,17 @@
 /** \def FINISH_PURCHASE_MESSAGE_LOOP
  * \brief Finish of loop to process Purchase messages. */
 #define FINISH_PURCHASE_MESSAGE_LOOP }
+/** \def START_STRATEGYADJUSTMENT_MESSAGE_LOOP
+ * \brief Start of loop to process StrategyAdjustment messages. */
+#define START_STRATEGYADJUSTMENT_MESSAGE_LOOP  for(StrategyAdjustment_message = get_first_StrategyAdjustment_message(); StrategyAdjustment_message != NULL; StrategyAdjustment_message = get_next_StrategyAdjustment_message(StrategyAdjustment_message)) {
+/** \def FINISH_STRATEGYADJUSTMENT_MESSAGE_LOOP
+ * \brief Finish of loop to process StrategyAdjustment messages. */
+#define FINISH_STRATEGYADJUSTMENT_MESSAGE_LOOP }
 
 
 struct FLAME_output
 {
-	int type; /* 0=snapshot 1=buyer 2=firm */
+	int type; /* 0=snapshot 1=buyer 2=firm 3=overseer */
 	int format; /* 0=XML */
 	char * location;
 	int period;
@@ -202,6 +208,36 @@ struct xmachine_memory_firm_state
 	int count;	/**< Number of agents that were in this state.  */
 };
 
+/** \struct xmachine_memory_overseer
+ * \brief Holds memory of xmachine overseer.
+ */
+struct xmachine_memory_overseer
+{
+	int firm_revenues[10];	/**< X-machine memory variable firm_revenues of type int. */
+	float firm_strategies[10];	/**< X-machine memory variable firm_strategies of type float. */
+};
+
+/** \struct xmachine_memory_overseer_holder
+ * \brief Holds struct of memory of xmachine overseer.
+ */
+struct xmachine_memory_overseer_holder
+{
+	/*@dependent@*/ struct xmachine_memory_overseer * agent;	/**< Pointer to X-machine memory overseer. */
+
+	/*@dependent@*/ struct xmachine_memory_overseer_holder * prev;	/**< Pointer to previous overseer agent in the list.  */
+	/*@dependent@*/ struct xmachine_memory_overseer_holder * next;	/**< Pointer to next overseer agent in the list.  */
+};
+
+/** \struct xmachine_memory_overseer_holder
+ * \brief Holds struct of memory of xmachine overseer.
+ */
+struct xmachine_memory_overseer_state
+{
+	/*@dependent@*/ struct xmachine_memory_overseer_holder * agents;	/**< Pointer to X-machine memory overseer. */
+
+	int count;	/**< Number of agents that were in this state.  */
+};
+
 /** \struct xmachine
  * \brief Holds xmachines.
  */
@@ -209,6 +245,7 @@ struct xmachine
 {
 	/*@dependent@*/ /*@null@*/ /*@out@*/ struct xmachine_memory_buyer * xmachine_buyer;	/**< Pointer to X-machine memory of type buyer.  */
 	/*@dependent@*/ /*@null@*/ /*@out@*/ struct xmachine_memory_firm * xmachine_firm;	/**< Pointer to X-machine memory of type firm.  */
+	/*@dependent@*/ /*@null@*/ /*@out@*/ struct xmachine_memory_overseer * xmachine_overseer;	/**< Pointer to X-machine memory of type overseer.  */
 };
 
 /** \var void* FLAME_m_PurchaseQuality_composite_params\n
@@ -223,6 +260,7 @@ struct m_PurchaseQuality
 	int qual;	/**< Message memory variable qual of type int. */
 	int id;	/**< Message memory variable id of type int. */
 	int seller;	/**< Message memory variable seller of type int. */
+	float strategy;	/**< Message memory variable strategy of type float. */
 };
 
 /** \var void* FLAME_m_Purchase_composite_params\n
@@ -236,6 +274,19 @@ struct m_Purchase
 {
 	int an_id;	/**< Message memory variable an_id of type int. */
 	int firm_id;	/**< Message memory variable firm_id of type int. */
+};
+
+/** \var void* FLAME_m_StrategyAdjustment_composite_params\n
+ * \brief Pointer to message sync agent composite params */
+void* FLAME_m_StrategyAdjustment_composite_params;
+
+/** \struct m_StrategyAdjustment
+ * \brief Holds message of type StrategyAdjustment_message.
+ */
+struct m_StrategyAdjustment
+{
+	int firm_id;	/**< Message memory variable firm_id of type int. */
+	float new_strategy;	/**< Message memory variable new_strategy of type float. */
 };
 
 /** \typedef struct xmachine xmachine
@@ -266,6 +317,18 @@ typedef struct xmachine_memory_firm_holder xmachine_memory_firm_holder;
  * \brief Typedef for xmachine_memory_firm struct.
  */
 typedef struct xmachine_memory_firm_state xmachine_memory_firm_state;
+/** \var typedef xmachine_memory_overseer xmachine_memory_overseer
+ * \brief Typedef for xmachine_memory_overseer struct.
+ */
+typedef struct xmachine_memory_overseer xmachine_memory_overseer;
+/** \var typedef xmachine_memory_overseer xmachine_memory_overseer
+ * \brief Typedef for xmachine_memory_overseer struct.
+ */
+typedef struct xmachine_memory_overseer_holder xmachine_memory_overseer_holder;
+/** \var typedef xmachine_memory_overseer xmachine_memory_overseer
+ * \brief Typedef for xmachine_memory_overseer struct.
+ */
+typedef struct xmachine_memory_overseer_state xmachine_memory_overseer_state;
 /** \typedef m_PurchaseQuality m_PurchaseQuality
  * \brief Typedef for m_PurchaseQuality struct.
  */
@@ -275,6 +338,11 @@ typedef struct m_PurchaseQuality m_PurchaseQuality;
  * \brief Typedef for m_Purchase struct.
  */
 typedef struct m_Purchase m_Purchase;
+
+/** \typedef m_StrategyAdjustment m_StrategyAdjustment
+ * \brief Typedef for m_StrategyAdjustment struct.
+ */
+typedef struct m_StrategyAdjustment m_StrategyAdjustment;
 
 
 /** \struct location
@@ -299,6 +367,7 @@ struct node_information
 	struct xmachine * agents;	/**< Pointer to list of X-machines. */
 	struct m_PurchaseQuality * PurchaseQuality_messages;	/**< Pointer to PurchaseQuality message list. */
 	struct m_Purchase * Purchase_messages;	/**< Pointer to Purchase message list. */
+	struct m_StrategyAdjustment * StrategyAdjustment_messages;	/**< Pointer to StrategyAdjustment message list. */
 
 	struct node_information * next;	/**< Pointer to next node on the list. */
 };
@@ -323,6 +392,9 @@ m_PurchaseQuality * temp_PurchaseQuality_message;
 /** \var m_Purchase * temp_Purchase_message
 * \brief Pointer to m_Purchase to initialise linked list. */
 m_Purchase * temp_Purchase_message;
+/** \var m_StrategyAdjustment * temp_StrategyAdjustment_message
+* \brief Pointer to m_StrategyAdjustment to initialise linked list. */
+m_StrategyAdjustment * temp_StrategyAdjustment_message;
 /** \var node_information * temp_node_info
 * \brief Pointer to node_information to initialise linked list. */
 node_information * temp_node_info;
@@ -363,18 +435,35 @@ xmachine_memory_buyer_state * buyer_01_state;
 /*@dependent@*/ xmachine_memory_firm_holder * temp_xmachine_firm_holder;
 /*@dependent@*/ /*@null@*/ /*@out@*/ xmachine_memory_firm_holder * current_xmachine_firm_holder;
 xmachine_memory_firm_state * current_xmachine_firm_next_state; /* New agents added to this state */
+/* Pointer to list of firm agents in state end state */
+//xmachine_memory_firm * temp_xmachine_firm_end;
+xmachine_memory_firm_state * firm_end_state;
 /* Pointer to list of firm agents in state 01 state */
 //xmachine_memory_firm * temp_xmachine_firm_01;
 xmachine_memory_firm_state * firm_01_state;
 /* Pointer to list of firm agents in state start state */
 //xmachine_memory_firm * temp_xmachine_firm_start;
 xmachine_memory_firm_state * firm_start_state;
-/* Pointer to list of firm agents in state end state */
-//xmachine_memory_firm * temp_xmachine_firm_end;
-xmachine_memory_firm_state * firm_end_state;
+/* Pointer to list of firm agents in state 03 state */
+//xmachine_memory_firm * temp_xmachine_firm_03;
+xmachine_memory_firm_state * firm_03_state;
 /* Pointer to list of firm agents in state 02 state */
 //xmachine_memory_firm * temp_xmachine_firm_02;
 xmachine_memory_firm_state * firm_02_state;
+/* Pointer to current $agent_name agent */
+/*@dependent@*/ /*@null@*/ /*@out@*/ xmachine_memory_overseer * current_xmachine_overseer;
+/*@dependent@*/ xmachine_memory_overseer_holder * temp_xmachine_overseer_holder;
+/*@dependent@*/ /*@null@*/ /*@out@*/ xmachine_memory_overseer_holder * current_xmachine_overseer_holder;
+xmachine_memory_overseer_state * current_xmachine_overseer_next_state; /* New agents added to this state */
+/* Pointer to list of overseer agents in state end state */
+//xmachine_memory_overseer * temp_xmachine_overseer_end;
+xmachine_memory_overseer_state * overseer_end_state;
+/* Pointer to list of overseer agents in state 01 state */
+//xmachine_memory_overseer * temp_xmachine_overseer_01;
+xmachine_memory_overseer_state * overseer_01_state;
+/* Pointer to list of overseer agents in state start state */
+//xmachine_memory_overseer * temp_xmachine_overseer_start;
+xmachine_memory_overseer_state * overseer_start_state;
 
 
 
@@ -384,6 +473,9 @@ MBt_Iterator i_PurchaseQuality;
 MBt_Board b_Purchase;
 MBt_Iterator i_Purchase;
 
+MBt_Board b_StrategyAdjustment;
+MBt_Iterator i_StrategyAdjustment;
+
 
 /** \var m_PurchaseQuality * PurchaseQuality_message
 * \brief Pointer to message struct for looping through PurchaseQuality message list */
@@ -391,6 +483,9 @@ m_PurchaseQuality * PurchaseQuality_message;
 /** \var m_Purchase * Purchase_message
 * \brief Pointer to message struct for looping through Purchase message list */
 m_Purchase * Purchase_message;
+/** \var m_StrategyAdjustment * StrategyAdjustment_message
+* \brief Pointer to message struct for looping through StrategyAdjustment message list */
+m_StrategyAdjustment * StrategyAdjustment_message;
 /** \var FLAME_output ** FLAME_outputs
 * \brief Pointer to list of outputs */
 FLAME_output * FLAME_outputs;
@@ -510,8 +605,16 @@ void add_firm_agent_internal(xmachine_memory_firm * agent, xmachine_memory_firm_
 void add_firm_agent(int buyer_ids[], int my_id, float quality, int stored_id);
 void unittest_init_firm_agent();
 void unittest_free_firm_agent();
+xmachine_memory_overseer_state * init_overseer_state();
+xmachine_memory_overseer * init_overseer_agent();
+void free_overseer_agent(xmachine_memory_overseer_holder * tmp, xmachine_memory_overseer_state * state);
+void transition_overseer_agent(xmachine_memory_overseer_holder * tmp, xmachine_memory_overseer_state * from_state, xmachine_memory_overseer_state * to_state);
+void add_overseer_agent_internal(xmachine_memory_overseer * agent, xmachine_memory_overseer_state * state);
+void add_overseer_agent(int firm_revenues[], float firm_strategies[]);
+void unittest_init_overseer_agent();
+void unittest_free_overseer_agent();
 
-void add_PurchaseQuality_message(int qual, int id, int seller);
+void add_PurchaseQuality_message(int qual, int id, int seller, float strategy);
 m_PurchaseQuality * add_PurchaseQuality_message_internal(void);
 m_PurchaseQuality * get_first_PurchaseQuality_message(void);
 m_PurchaseQuality * get_next_PurchaseQuality_message(m_PurchaseQuality * current);
@@ -522,6 +625,12 @@ m_Purchase * add_Purchase_message_internal(void);
 m_Purchase * get_first_Purchase_message(void);
 m_Purchase * get_next_Purchase_message(m_Purchase * current);
 void freePurchasemessages(void);
+
+void add_StrategyAdjustment_message(int firm_id, float new_strategy);
+m_StrategyAdjustment * add_StrategyAdjustment_message_internal(void);
+m_StrategyAdjustment * get_first_StrategyAdjustment_message(void);
+m_StrategyAdjustment * get_next_StrategyAdjustment_message(m_StrategyAdjustment * current);
+void freeStrategyAdjustmentmessages(void);
 
 
 void set_my_id(int my_id);
@@ -535,6 +644,8 @@ void set_quality(float quality);
 float get_quality();
 void set_stored_id(int stored_id);
 int get_stored_id();
+int * get_firm_revenues();
+float * get_firm_strategies();
 int agent_get_id(void);
 double agent_get_x(void);
 double agent_get_y(void);
@@ -552,6 +663,10 @@ m_PurchaseQuality * get_next_message_PurchaseQuality_in_range(m_PurchaseQuality 
 
 
 m_Purchase * get_next_message_Purchase_in_range(m_Purchase * current);
+
+
+
+m_StrategyAdjustment * get_next_message_StrategyAdjustment_in_range(m_StrategyAdjustment * current);
 
 
 
@@ -573,4 +688,9 @@ int f_send_message(void);
 int f_idle(void);
 int f_receive_messages(void);
 int FLAME_filter_firm_f_receive_messages_01_02_Purchase(const void *msg, const void *params);
+int f_receive_strategy(void);
+int FLAME_filter_firm_f_receive_strategy_03_end_StrategyAdjustment(const void *msg, const void *params);
+int o_receive_messages(void);
+int o_send_message(void);
+int FLAME_condition_overseer_o_send_message_01_end(xmachine_memory_overseer *a);
 #endif
