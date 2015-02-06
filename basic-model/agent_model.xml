@@ -145,7 +145,7 @@
                 <nextState>01</nextState>
                 <inputs> <!-- List of possible inputs -->
                     <input>
-                        <messageName>PurchaseInfo</messageName>
+                        <messageName>PurchaseQuality</messageName>
                     </input>
                 </inputs>              
             </function>
@@ -202,6 +202,23 @@
                 <type>int</type>
                 <name>firm_id</name>
                 <description>to what firm id</description>
+            </variable>
+        </variables>
+    </message>
+
+    <message>
+        <name>StrategyAdjustment</name>
+        <description>A message to firm to change strategy</description>
+        <variables> <!-- List of message variables -->
+            <variable>
+                <type>int</type>
+                <name>firm_id</name>
+                <description>which firm has it's strategy changed</description>
+            </variable>
+            <variable>
+                <type>float</type>
+                <name>new_strategy</name>
+                <description>the firms new strategy</description>
             </variable>
         </variables>
     </message>

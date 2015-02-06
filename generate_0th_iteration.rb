@@ -27,7 +27,12 @@ for i in 1..NumFirms do
 	buyer = 1 + rand(NumBuyers)
 	puts "<stored_id>#{buyer}</stored_id>"
 	puts "</xagent>"
-
 end
+#Generate Overseer
+puts "<xagent>"
+puts "<name>overseer</name>"
+puts "<firm_revenues>{0,0,0,0,0,0,0,0,0,0}</firm_revenues>"
+puts "</xagent>"
+#endstuff
 puts "</agents>"
 puts "</states>"

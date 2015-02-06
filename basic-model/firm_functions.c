@@ -26,7 +26,6 @@ int f_receive_messages() {
 	for (i = i; i < 100; i++) {
 		BUYER_IDS[i] = 0;
 	}
-	printf("run firm \n");
 
 	// printf("The sum of ids received is: %d\n", SUM_OF_IDS);
 
