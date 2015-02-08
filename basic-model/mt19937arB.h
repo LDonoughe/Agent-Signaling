@@ -79,7 +79,7 @@ void init_genrandB(unsigned long s)
 void init_by_arrayB(unsigned long init_key[], int key_length)
 {
     int i, j, k;
-    init_genrandA(19650218UL);
+    init_genrandB(19650218UL);
     i=1; j=0;
     k = (N>key_length ? N : key_length);
     for (; k; k--) {

@@ -40,11 +40,12 @@ int o_send_message() {
 	int i;
 	int low, lower, lowest;
 	int fLow, fLower, fLowest;
-	int change, anchor;
+	float change;
+	int anchor;
 
-	low = 65,535;
-	lower = 65,535;
-	lowest = 65,535;
+	low = 2147483647;
+	lower = 2147483647;
+	lowest = 2147483647;
 
 	//find lowest numbers
 	for (i = 0; i < 10; i++) {
@@ -66,6 +67,7 @@ int o_send_message() {
 		}
 	}
 
+	// printf("low: %d, lower: %d, lowest: %d \n", fLow, fLower, fLowest);
 	// The higher High quality Probability is, the more unlikely it is to produce low quality goods.
 	for (i = 0; i < 3; i++) {
 		while (1 == 1) {
@@ -87,14 +89,18 @@ int o_send_message() {
 				}
 			}
 		}
+
 		if (i == 0) {
 			add_StrategyAdjustment_message(fLowest + 101, FIRM_STRATEGIES[anchor] + change);
+			printf("Firm %d adopted a new strategy from %d which is %f + %f \n", fLowest + 101, anchor + 101, FIRM_STRATEGIES[anchor], change);
 		}
 		if (i == 1) {
 			add_StrategyAdjustment_message(fLower + 101, FIRM_STRATEGIES[anchor] + change);
+			printf("Firm %d adopted a new strategy from %d which is %f + %f \n", fLower + 101, anchor + 101, FIRM_STRATEGIES[anchor], change);
 		}
 		if (i == 2) {
 			add_StrategyAdjustment_message(fLow + 101, FIRM_STRATEGIES[anchor] + change);
+			printf("Firm %d adopted a new strategy from %d which is %f + %f \n", fLow + 101, anchor + 101, FIRM_STRATEGIES[anchor], change);
 		}
 	}
 

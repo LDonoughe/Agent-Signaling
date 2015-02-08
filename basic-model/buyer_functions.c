@@ -30,7 +30,7 @@ int b_receive_messages() {
 	START_PURCHASEQUALITY_MESSAGE_LOOP
 		MY_QUAL = PurchaseQuality_message->qual;
 		SELLER = PurchaseQuality_message->seller;
-		printf("%d recieved quality %d from %d \n", MY_ID, MY_QUAL, SELLER);
+		// printf("%d recieved quality %d from %d \n", MY_ID, MY_QUAL, SELLER);
 		if (MY_QUAL == 1) { //Quality Level A
 			if (genrand_real1() > 0.9) {
 				while (1 == 1) {
@@ -39,7 +39,7 @@ int b_receive_messages() {
 						break;
 					}
 				}
-				printf("%d switched from Firm %d to Firm %d because a product of quality %d failed \n", MY_ID, SELLER, new_seller, MY_QUAL);
+				// printf("%d switched from Firm %d to Firm %d because a product of quality %d failed \n", MY_ID, SELLER, new_seller, MY_QUAL);
 				SELLER = new_seller;
 			} else {
 				//stay
@@ -52,7 +52,7 @@ int b_receive_messages() {
 						break;
 					}
 				}
-				printf("%d switched from Firm %d to Firm %d because a product of quality %d failed \n", MY_ID, SELLER, new_seller, MY_QUAL);
+				// printf("%d switched from Firm %d to Firm %d because a product of quality %d failed \n", MY_ID, SELLER, new_seller, MY_QUAL);
 				SELLER = new_seller;
 			} else {
 				//stay
