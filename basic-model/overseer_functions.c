@@ -12,6 +12,12 @@ int o_receive_messages() {
 	int quality = 0;
 	int RevenuePerUnit = 0;
 
+	for (i = 0; i < 10; i++) {
+		FIRM_REVENUES[i] = 0;
+		printf("Firm %d revenue now %d \n",i + 1,FIRM_REVENUES[i]);
+	}
+
+	i = 0;
 	while (1 == 1) {
 
 		START_PURCHASEQUALITY_MESSAGE_LOOP
@@ -35,7 +41,7 @@ int o_receive_messages() {
 	return 0; /* Returning zero means the agent is not removed */
 }
 
-//actually change this
+//Tell firms new strategy <- the crucial function
 int o_send_message() {
 	int i;
 	int low, lower, lowest;

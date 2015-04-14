@@ -8,8 +8,8 @@
 #
 DEFINES       = -DNONE
 LIBMBOARD_DIR = libmboard
-LIBMBOARD_INC = $(LIBMBOARD_DIR)/include
-LIBMBOARD_LIB = $(LIBMBOARD_DIR)/lib
+LIBMBOARD_INC = /usr/local/include
+LIBMBOARD_LIB = /usr/local/lib
 
 CC      = gcc
 CFLAGS  = -std=c99 -Wall -I$(LIBMBOARD_INC) ${DEFINES}

@@ -34,3 +34,4 @@
 !agent_model.xml
 *.tex
 *.dot
+.DS_Store
