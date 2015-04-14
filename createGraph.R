@@ -1,3 +1,5 @@
+#!/bin/rscript
+
 #postscript(family="Times", 'multi.ps', width=40)
 #pdf(family="Times", 'multi.pdf', width=40)
 rawData <- file("stdin")

@@ -1,4 +1,4 @@
-# Incomplete
+#!/bin/ruby
 
 require 'Nokogiri'
 

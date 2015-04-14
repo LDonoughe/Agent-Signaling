@@ -1,3 +1,5 @@
+#!/bin/ruby
+
 # Generate 0.xml
 
 # Generate Header
