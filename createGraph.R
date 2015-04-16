@@ -34,8 +34,15 @@ par(mfrow=c(3,4)) # all plots on one page
 # opts = c("p","l","o","b","c","s","S","h")
 for(i in 2:11){
   heading = paste("firm =",i-1)
-  plot(data[,1], data[,i], type="n", main=heading, xlab="Iteration", ylab="Alpha")
-  lines(data[,1], data[,i], type="c")
+  plot(data[,1], data[,i], main=heading, xlab="Iteration", ylab="Alpha")
+  # lines(data[,1], data[,i], type="c")
+}
+line1node <- cbind(data[, c(1)], data[,c(12)])
+par(mfrow=c(3,4))
+for(i in 12:21){
+  heading = paste("firm =",i-11)
+  plot(data[,1], data[,i], main=heading, xlab="Iteration", ylab="Revenue", xlim=c(0,10000), ylim=c(0,100))
+  # lines(data[,1], data[,i], type="c")
 }
 
 data1

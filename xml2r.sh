@@ -27,7 +27,7 @@ cp $DIR/[5-9]* $DIRTWO
 cp $DIR/[a-k,m-z]* $DIRTWO
 cp $DIR/l[a-h,j-z]* $DIRTWO
 echo Extracting data, making graphs
-ruby parse_xml_extract_strategies.rb $DIR/ | Rscript createGraph.R > xmldata.csv
+ruby parse_xml_extract_strategies.rb $DIR/ | Rscript createGraph.R > xmldata
 echo moving graphs to correct location
 mv Rplots.pdf $DIRTWO
-mv xmldata.csv $DIRTWO
+mv xmldata $DIRTWO

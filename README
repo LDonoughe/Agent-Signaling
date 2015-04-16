@@ -1,5 +1,10 @@
 This is the code portion of a undergraduate thesis investigating the combination of two topics in Game Theory: ESS and Signalling. 
 
+basic-model contains the original model specification.
+
+asymmetric-payoffs contains the same model with the (payoff) variables altered and serves as a staging ground to test the impact of those changes.
+
+follow-the-leader contains the original model with a change in the implementation of the genetic algorithm to only emulate the most profitable firm rather then any firm not in the bottom three
 
 To Run:
 Install FLAME and pre-reqs (limboard and xparser)

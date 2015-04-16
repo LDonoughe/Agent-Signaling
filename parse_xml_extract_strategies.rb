@@ -15,8 +15,8 @@ for i in 0..10000 do
 		@doc = Nokogiri::XML(File.open(directory + i.to_s + ".xml"))
 		firm_strategies = @doc.xpath("//firm_strategies")
 		firm_revenues = @doc.xpath("//firm_revenues")
-		puts(i.to_s + "," + firm_strategies.to_s.gsub('<firm_strategies>{','').gsub('}</firm_strategies>','') + 
-			firm_revenues.to_s.gsub('<firm_revenues>{','').gsub('}</firm_revenues>',''))
+		puts(i.to_s + "," + firm_strategies.to_s.gsub('<firm_strategies>{','').gsub('}</firm_strategies>','') + "," +
+			firm_revenues.to_s.gsub('}</firm_revenues>','').gsub('<firm_revenues>{',' ')) #.gsub('<firm_revenues>{','').gsub('}</firm_revenues>',''))
 	end
 end
 
