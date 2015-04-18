@@ -90,7 +90,11 @@ int o_send_message() {
 			if (anchor != fLow) {
 				if (anchor != fLower) {
 					if (anchor != fLowest) {
-					break;
+						if (FIRM_STRATEGIES[anchor] + change <= 1.0) {
+							if (FIRM_STRATEGIES[anchor] + change >= 0.0) {
+								break;
+							}
+						}
 					}
 				}
 			}
