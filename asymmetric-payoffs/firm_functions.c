@@ -32,11 +32,11 @@ int f_send_message() {
 	int i;
 	int qual;
 
-	// The higher High Quality Probability is i.e., alpha, the more likely the firm is to produce high quality goods.
+	// The higher High Quality Probability is i.e., alpha, the more likely the firm is to produce low quality goods.
 	if (genrand_real1A() > QUALITY) {
-		qual = 0;
-	} else {
 		qual = 1;
+	} else {
+		qual = 0;
 	}
 	for (i = 0; i < 100; i++) {
 		if (BUYER_IDS[i] == 0) {
