@@ -76,24 +76,25 @@ int o_send_message() {
 	// printf("low: %d, lower: %d, lowest: %d \n", fLow, fLower, fLowest);
 	// The higher High quality Probability is, the more unlikely it is to produce low quality goods.
 	for (i = 0; i < 3; i++) {
-		while (1 == 1) {
-			change = genrand_real1B();
-			if (change <= 0.1) {
-				if (change >= -0.1) {
-					break;
-				}
-			}
-		}
+
 		while (1 == 1) {
 			//anchor to random success
 			anchor = genrand_int32B()*(10.0/4294967295.0);
 			if (anchor != fLow) {
 				if (anchor != fLower) {
 					if (anchor != fLowest) {
-						if (FIRM_STRATEGIES[anchor] + change <= 1.0) {
-							if (FIRM_STRATEGIES[anchor] + change >= 0.0) {
-								break;
-							}
+						break;
+					}
+				}
+			}
+		}
+		while (1 == 1) {
+			change = genrand_real1B();
+			if (change <= 0.1) {
+				if (change >= -0.1) {
+					if (FIRM_STRATEGIES[anchor] + change <= 1.0) {
+						if (FIRM_STRATEGIES[anchor] + change >= 0.0) {
+							break;
 						}
 					}
 				}
