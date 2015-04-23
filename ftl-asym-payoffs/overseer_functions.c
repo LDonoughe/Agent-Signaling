@@ -26,9 +26,9 @@ int o_receive_messages() {
 			i = firm - 101; //firm ids are all plus 100
 			// printf("%d purchased from %d \n", STORED_ID, MY_ID);
 			if (quality == 1) {
-				RevenuePerUnit = 1;
-			} else {
 				RevenuePerUnit = 5;
+			} else {
+				RevenuePerUnit = 1;
 			}
 			FIRM_STRATEGIES[i] = PurchaseQuality_message->strategy;
 			FIRM_REVENUES[i] = FIRM_REVENUES[i] + RevenuePerUnit;
