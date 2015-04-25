@@ -108,13 +108,14 @@ int o_send_message() {
 
 		while (1 == 1) {
 			change = genrand_real1B();
+			if (genrand_real1B() > 0.5) {
+				change = (-1)*change;
+			}
 			if (change <= 0.1) {
 				if (change >= -0.1) {
-					if (FIRM_STRATEGIES[anchor] + change <= 1) {
-						if (FIRM_STRATEGIES[anchor] + change >= 0) {
-							if (genrand_real1B() > 0.5) {
-								change = (-1)*change;
-							}
+					if (FIRM_STRATEGIES[anchor] + change <= 1.0) {
+						if (FIRM_STRATEGIES[anchor] + change >= 0.0) {
+
 							break;
 						}
 					}

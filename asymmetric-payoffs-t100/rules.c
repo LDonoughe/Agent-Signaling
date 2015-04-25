@@ -77,6 +77,18 @@ int FLAME_condition_overseer_o_send_message_01_end(xmachine_memory_overseer *a)
 }
 
 
+/** \fn int FLAME_condition_overseer_o_idle_01_end(xmachine_memory_overseer *a)
+ * \brief The condition function for an agent function.
+ * \param a The agent memory.
+ * \return The success (1) or failure (0) of the condition.
+ */
+int FLAME_condition_overseer_o_idle_01_end(xmachine_memory_overseer *a)
+{
+	if(!(iteration_loop%100 == 0)) return 1;
+	else return 0;
+}
+
+
 
 /** \fn int FLAME_filter_buyer_b_receive_messages_01_end_PurchaseQuality(const void *msg, const void *params)
  * \brief The filter function for a message input used in serial for each agent.

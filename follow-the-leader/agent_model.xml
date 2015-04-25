@@ -213,21 +213,7 @@
                         </time>
                     </not>
                 </condition>         
-            </function>
-            <function>
-                <name>o_idle</name>
-                <description>idle</description>
-                <currentState>01</currentState>
-                <nextState>end</nextState>
-                <condition>
-                    <not>
-                        <time>
-                            <period>round</period>
-                            <phase>0</phase>
-                        </time>
-                    </not>
-                </condition>         
-            </function>     
+            </function>   
         </functions>
     </xagent>
 </agents>

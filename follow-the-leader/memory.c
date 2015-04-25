@@ -154,6 +154,13 @@ void unittest_o_send_message_01_end()
 	//return o_send_message();
 }
 
+void unittest_o_idle_01_end()
+{
+	
+	
+	//return o_idle();
+}
+
 
 void free_messages()
 {
