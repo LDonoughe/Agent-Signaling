@@ -12,11 +12,6 @@ int o_receive_messages() {
 	int quality = 0;
 	int RevenuePerUnit = 0;
 
-	for (i = 0; i < 10; i++) {
-		FIRM_REVENUES[i] = 0;
-		printf("Firm %d revenue now %d \n",i + 1,FIRM_REVENUES[i]);
-	}
-
 	i = 0;
 	while (1 == 1) {
 
@@ -117,5 +112,17 @@ int o_send_message() {
 		}
 	}
 
+	for (i = 0; i < 10; i++) {
+		FIRM_REVENUES[i] = 0;
+		// printf("Firm %d revenue now %d \n",i + 1,FIRM_REVENUES[i]);
+	}
+	printf("Revenue's Reset to 0\n");
+
+	return 0;
+}
+
+int o_idle() {
+
+	// Do Nothing, allow Overseer to collect more revenues.
 	return 0;
 }

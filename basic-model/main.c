@@ -1223,7 +1223,30 @@ if(FLAME_PurchaseQuality_message_board_read == 0)
     }
     #endif
 
-
+	/* DEBUG: States with branching functions */
+		current_xmachine_overseer_holder = overseer_01_state->agents;
+		while(current_xmachine_overseer_holder)
+		{
+			FLAME_debug_count = 0;
+			/* Function: o_idle */
+			if(FLAME_condition_overseer_o_idle_01_end(current_xmachine_overseer_holder->agent)==1)
+			{ FLAME_debug_count++; }
+			/* Function: o_send_message */
+			if(FLAME_condition_overseer_o_send_message_01_end(current_xmachine_overseer_holder->agent)==1)
+			{ FLAME_debug_count++; }
+			/*printf("FLAME_debug_count = %d\n", FLAME_debug_count);*/
+			if(FLAME_debug_count != 1)
+			{
+				fprintf(stderr, "ERROR: A function condition test has failed for agent type 'overseer' leaving state '01'\n");
+				if(FLAME_debug_count > 1)
+					fprintf(stderr, "\t reason: there was more than one possible outgoing transition function\n");
+				if(FLAME_debug_count == 0)
+					fprintf(stderr, "\t reason: there was no possible outgoing transition function\n");
+			}
+			
+			current_xmachine_overseer_holder = current_xmachine_overseer_holder->next;
+		}
+	
 	if(FLAME_TEST_PRINT_START_AND_END_OF_MODEL_FUNCTIONS) printf("start o_send_message\n");
 	current_xmachine_overseer_holder = overseer_01_state->agents;
 	while(current_xmachine_overseer_holder)
@@ -1261,6 +1284,45 @@ if(FLAME_PurchaseQuality_message_board_read == 0)
 		current_xmachine_overseer_holder = temp_xmachine_overseer_holder;
 	}
 	if(FLAME_TEST_PRINT_START_AND_END_OF_MODEL_FUNCTIONS) printf("finish o_send_message\n");
+
+
+	if(FLAME_TEST_PRINT_START_AND_END_OF_MODEL_FUNCTIONS) printf("start o_idle\n");
+	current_xmachine_overseer_holder = overseer_01_state->agents;
+	while(current_xmachine_overseer_holder)
+	{
+		temp_xmachine_overseer_holder = current_xmachine_overseer_holder->next;
+		current_xmachine_overseer = current_xmachine_overseer_holder->agent;
+		current_xmachine_overseer_next_state = overseer_end_state;
+		/* For backwards compatibility set current_xmachine */
+		current_xmachine->xmachine_buyer = NULL;
+		current_xmachine->xmachine_firm = NULL;
+		current_xmachine->xmachine_overseer = NULL;
+		current_xmachine->xmachine_overseer = current_xmachine_overseer;
+
+		if(FLAME_condition_overseer_o_idle_01_end(current_xmachine_overseer)==1)
+		{
+
+		
+
+			i = o_idle();
+
+		
+
+			if(i == 1)
+			{
+				free_overseer_agent(current_xmachine_overseer_holder, overseer_01_state);
+			}
+			else
+			{
+				transition_overseer_agent(current_xmachine_overseer_holder, overseer_01_state, overseer_end_state);
+			}
+		}
+
+		current_xmachine_overseer = NULL;
+
+		current_xmachine_overseer_holder = temp_xmachine_overseer_holder;
+	}
+	if(FLAME_TEST_PRINT_START_AND_END_OF_MODEL_FUNCTIONS) printf("finish o_idle\n");
 
 	if(FLAME_StrategyAdjustment_message_board_write == 1)
 	{

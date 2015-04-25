@@ -693,4 +693,6 @@ int FLAME_filter_firm_f_receive_strategy_03_end_StrategyAdjustment(const void *m
 int o_receive_messages(void);
 int o_send_message(void);
 int FLAME_condition_overseer_o_send_message_01_end(xmachine_memory_overseer *a);
+int o_idle(void);
+int FLAME_condition_overseer_o_idle_01_end(xmachine_memory_overseer *a);
 #endif

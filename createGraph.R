@@ -41,7 +41,7 @@ line1node <- cbind(data[, c(1)], data[,c(12)])
 par(mfrow=c(3,4))
 for(i in 12:21){
   heading = paste("firm =",i-11)
-  plot(data[,1], data[,i], main=heading, xlab="Iteration", ylab="Revenue", xlim=c(0,10000), ylim=c(0,100))
+  plot(data[,1], data[,i], main=heading, xlab="Iteration", ylab="Revenue", xlim=c(0,10000), ylim=c(0,750))
   # lines(data[,1], data[,i], type="c")
 }
 
